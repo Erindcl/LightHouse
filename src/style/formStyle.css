@@ -1,0 +1,22 @@
+.btn{
+  height: 30px;
+  font-size: 14px;
+  line-height: 30px;
+  padding: 0px 15px;
+  color: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.background_green{
+  background: #6ABA9C;
+}
+.background_orange{
+  background: #EA7C5A;
+}
+.input_text{
+  height: 24px;
+  width: 96%;
+  border: 1px solid#ccc;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
