@@ -43,19 +43,18 @@
       <div class="level_box">
         <div class="step_title">选择演示文件类型：</div>
         <div class="step_content">
-          <span class="radio_input"><input type="radio" name="fileType" value="图片" checked /> 图片</span>
-          <span class="radio_input"><input type="radio" name="fileType" value="视频" /> 视频</span>
+          <span class="radio_input"><input type="radio" @click="changeFileType('image')" name="fileType" value="图片" checked /> 图片</span>
+          <span class="radio_input"><input type="radio" @click="changeFileType('video')" name="fileType" value="视频" /> 视频</span>
           <a href="javascript:;" class="file_input_box">
-            <input type="file" id="input_file" accept="image/png,image/gif" @change="uploadFile()" multiple="multiple"/>选择演示文件
+            <input type="file" id="input_file" accept="image/png,image/gif,image/jpg,video/mp4" @change="uploadFile" multiple="multiple"/>选择演示文件
           </a>
         </div>
       </div>
       <div class="level_box">
         <div class="step_title" style="width: 148px;">
         </div>
-        <div class="step_content">
+        <div class="step_content" id="show_files_box">
           <div class="upload_file">
-            <!-- <img src="../../static/icons/img_file.png" alt=""> -->
             <img src="../../static/icons/file_notKnow.png" alt="">
             <span>还未上传任何文件</span>
           </div>
@@ -80,14 +79,13 @@
         },
         nowStatus: 0,
         // nowTime: '',
-        showModel: true,
+        showModel: false,
         clientWidth: 0,
         clientHeight: 0,
         myproject: {
           githubSrc: '',
           textDescribe: '',
-          fileType: '',
-          filesName: [],
+          fileType: 'image',
           filesSrc: []
         }
       }
@@ -108,29 +106,53 @@
           this.showModel = false;
         }
       },
+      // 添加当前上传文件的类型
+      changeFileType (str) {
+        this.myproject.fileType = str;
+      },
       // 上传项目信息
       uploadProject () {
         console.log('项目地址' + this.myproject.githubSrc);
         console.log('项目描述' + this.myproject.textDescribe);
-        console.log('演示文件' + this.myproject.files);
+        console.log('演示文件' + this.myproject.filesSrc);
         this.showModel = false;
         this.nowStatus = 2;
       },
       //获取文件路径和文件名保存在我的项目对象里
       uploadFile () {
         //  文件名放入div中显示出已上传的文件  ？？？
-        // let oInput = document.getElementById('input_file');
-        console.log(event.target.files[0]);
-        // for (let i = 0; i <oInput.files.length; i++) {
-        //   let myfile = oInput.files[i];
-        //   console.log(myfile);
-	      //   let fileReader = new FileReader();
-        //   console.log(fileReader);
-	      //   fileReader.readAsDataURL(myfile);
-        //   console.log(fileReader.result)
-	      //   // this.myproject.filesSrc.push(fileReader.result);
-        // }
-        // console.log(this.myproject.files)
+        let showFiles = document.getElementById('show_files_box');
+        // let outStr = '';
+        let fileList = event.target.files;
+        showFiles.innerHTML = '';
+        console.log(fileList);
+        for (let i = 0; i < fileList.length; i++) {
+          // image  video
+          let thisFileType = fileList[i].type.split('/')[0];
+          let oDiv = document.createElement("div");
+          // console.log(thisFileType);
+          if (thisFileType ==  this.myproject.fileType) {
+            if (thisFileType == 'image') {
+              oDiv.innerHTML = `<img style="height: 20px;vertical-align: middle;margin-right: 5px;" src="../../static/icons/img_file.png" alt=""><span style="font-size: 10px;display: inline-block;width: 100px;height: 30px;line-height: 30px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #999999;">` + fileList[i].name + `</span>`;
+            } else {
+              oDiv.innerHTML = `<img style="height: 20px;vertical-align: middle;margin-right: 5px;" src="../../static/icons/video_file.png" alt=""><span style="font-size: 10px;display: inline-block;width: 100px;height: 30px;line-height: 30px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #999999;">` + fileList[i].name + `</span>`;
+            }
+          } else {
+            oDiv.innerHTML = `<img style="height: 20px;vertical-align: middle;margin-right: 5px;" src="../../static/icons/file_notKnow.png" alt=""><span style="font-size: 10px;display: inline-block;width: 100px;height: 30px;line-height: 30px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #999999;">文件格式不正确！</span>`;
+            // alert('文件上传格式不正确！请重新选择文件');
+          }
+          oDiv.style.width = '160px';
+          oDiv.style.height = '50px';
+          oDiv.style.display = 'flex';
+          oDiv.style.justifyContent = 'center';
+          oDiv.style.alignItems = 'center';
+          oDiv.style.background = '#F2F2F2';
+          oDiv.style.borderRadius = '2px';
+          oDiv.style.margin = '0px 10px 10px 0px';
+          showFiles.appendChild(oDiv);
+	        this.myproject.filesSrc.push(window.URL.createObjectURL(fileList[i]));
+        }
+        // console.log(this.myproject.filesSrc);
       }
     },
     mounted () {
@@ -238,8 +260,8 @@
     align-items: center;
   }
   .center_box{
-    height: 480px;
-    width: 800px;
+    height: 490px;
+    width: 850px;
     background: #fff;
     overflow-y: auto;
     /* padding: 15px 0px; */
