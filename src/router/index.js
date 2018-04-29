@@ -10,6 +10,7 @@ const root = Vue.component('root', {
 })
 
 export default new Router({
+  mode: 'hash',
   routes: [
     {
       path: '/',

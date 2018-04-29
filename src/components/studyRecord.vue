@@ -1,31 +1,30 @@
 <template>
 	<div class="studyrecord-wrapper">
 		 <ul class="studyrecord">
-		 	<li class="list-wrapper"
+		 	<li class="list_wrapper" :key="index"
 		 		v-for="(item, index) in recordlist">
-		 		<div class="list-date" ref="listdate">
+		 		<div class="list_date" ref="listdate">
 		 			{{item.date}}
 		 		</div>
-		 		<div class="list-content" ref="listcontent">
+		 		<div class="list_content" ref="listcontent">
 		 			<ul  ref="listdetail">
-		 				<li class="record-content"
-		 					ref="listli"
+		 				<li class="record_content"
+		 					ref="listli" :key="index"
 		 					v-for="(record, index) in item.record">
-		 					<div class="record-type"
+		 					<div class="record_type"
 		 						 ref="recordtype">
-		 						<span>
+		 						<span :class="{bg_orange: record.type == '课程', bg_green: record.type == '资源'}">
 		 							{{record.type}}
 		 						</span>
 		 					</div>
 		 					<div>
 		 						<ul  class="recordlist" ref="recordlist">
-		 							<li v-for="list in record.list"
+		 							<li  :key="index1" v-for="(list, index1) in record.list"
 		 								>
 		 								<span v-show="list.status === 0">正在学习</span>
 		 								<span v-show="list.status === 1">已完成</span>
-		 								<span v-show="!list.path">{{list.name}}</span>
-		 								<span v-show="list.path">
-		 									<a href="item.path" >{{list.name}}</a>
+		 								<span>
+		 									<a :href="list.path" >{{list.name}}</a>
 		 								</span>
 		 							</li>
 		 						</ul>
@@ -46,24 +45,24 @@ export default {
 		return {
 			recordlist:[
 				{
-					date: '2018-2-14',
+					date: '2018-02-14',
 					record: [
 						{
 							type: '课程',
 							list: [ {
 										name: '《html进阶》',
 										status: 0,
-										path: 'http://www.baidu.com'
+										path: ''
 									}, 
 									{
 										name: '《html进阶》',
 										status: 1,
-										path: 'http://www.baidu.com'
+										path: ''
 									}, 
 									{
 										name: '《html进阶》',
 										status: 0,
-										path: 'http://www.baidu.com'
+										path: ''
 									}, 
 									{
 										status: 0,
@@ -76,12 +75,12 @@ export default {
 							list: [ {
 										name: '《html进阶》',
 										status: 0,
-										path: 'http://www.baidu.com'
+										path: ''
 									}, 
 									{
 										name: '《html进阶》',
 										status: 1,
-										path: 'http://www.baidu.com'
+										path: ''
 									}, 
 									{
 										status: 0,
@@ -92,24 +91,24 @@ export default {
 					]
 				},
 				{
-				date: '2018-4-14',
+				date: '2018-04-14',
 				record: [
 					{
 						type: '课程',
 						list: [ {
 									name: '《html进阶》',
 									status: 1,
-									path: 'http://www.baidu.com'
+									path: ''
 								}, 
 								{
 									name: '《html进阶》',
 									status: 0,
-									path: 'http://www.baidu.com'
+									path: ''
 								}, 
 								{
 									status: 1,
 									name: '《html进阶》',
-									path: 'http://www.baidu.com'
+									path: ''
 								}, 
 								{
 									status: 0,
@@ -122,13 +121,28 @@ export default {
 						list: [ {
 									status: 1,
 									name: '《html进阶》',
-									path: 'http://www.baidu.com'
+									path: ''
 								}, 
 								{
 									status: 0,
 									name: '《js入门》',
+									path: ''
 								} 
-							  ]
+							]
+					},
+					{
+						type: '资源',
+						list: [ {
+									status: 1,
+									name: '《html进阶》',
+									path: ''
+								}, 
+								{
+									status: 0,
+									name: '《js入门》',
+									path: ''
+								} 
+							]
 					}
 				]
 				}
@@ -152,10 +166,24 @@ export default {
 				this.$refs.listcontent[i-1].style.height = (sum) +'px'
 				this.$refs.listdate[i-1].style.height = sum +'px'
 			}
+		},
+		initPath () {
+			for (let i = 0; i < this.recordlist.length; i++) {
+				for (let j = 0; j < this.recordlist[i].record.length; j++) {
+					for (let k = 0; k < this.recordlist[i].record[j].list.length; k++) {
+						if (this.recordlist[i].record[j].type == '课程') {
+							this.recordlist[i].record[j].list[k].path = '#/comshow/studypage?name=' + this.recordlist[i].record[j].list[k].name;
+						} else {
+							this.recordlist[i].record[j].list[k].path = '#/comshow/oneresource?title=' + this.recordlist[i].record[j].list[k].name;
+						}
+					}
+				}
+			}
 		}
 	},
 	mounted() {
-		this.change()
+		this.change();
+		this.initPath();
 	}
 }
 </script>
@@ -164,51 +192,58 @@ export default {
 .studyrecord{
 	padding: 30px;
 }
-.list-wrapper {
+.list_wrapper {
 	background-color: white;
 	/*clear: both;*/
 }
-.list-date{
+.list_date{
 	background-color: blue;
 	float: left;
-	width: 90px;
+	width: 100px;
 	position: relative;
 	background: white;
 	padding-right: 10px;
 	color: #cccccc;
-	border-right: 4px solid #e6e6e6
+	border-right: 3px solid #e6e6e6
 }
-.list-date:after{
+.list_date:after{
 	content: '';
-	width: 14px;
-	height: 14px;
+	width: 12px;
+	height: 12px;
 	position: absolute;
-	right: -9px;
+	right: -7px;
+	top: 5px;
 	border-radius: 50%;
 	background-color: #e6e6e6;
 }
-.list-content{
+.list_content{
 	/*background-color: yellow;*/
 	display: block;
 }
-.record-content{
+.record_content{
 	height: 30px;
 	line-height: 30px;
 }
-.record-type{
+.record_type{
 	float: left;
 	margin:0 20px 0 35px;
 	width: 60px;
 	background-color: white
 }
-.record-type span{
-	background-color: #EA7C5A;
+.record_type span{
 	color: white;
+	font-size: 12px;
 	display: inline-block;
 	padding: 2px 10px;
 	height: 20px;
 	line-height: 20px;
 	border-radius: 3px
+}
+.bg_orange{
+	background-color: #EA7C5A;
+}
+.bg_green{
+	background-color: #6ABA9C;
 }
 .recordlist span {
 	padding: 0 10px;

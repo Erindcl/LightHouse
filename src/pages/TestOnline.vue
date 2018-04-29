@@ -4,28 +4,16 @@
 		<div class="test-wrapper">
 			<div class="test-title">
 				<span>HTML</span>
-				<span v-if="startstatus" @click="toggleStatus">
-					<span :class="status" ></span>
-					开始测试
-				</span>
-				<span  v-if="!startstatus && !overFlag" @click="toggleOverStatus">
-					<span class="pause">▐▐</span>
-					测试中 
-					<span> 10:00 </span>
-				</span>
-				<span v-if="overFlag">
-					<span :class="status" ></span>
-					已结束测试
-				</span>
+				<span class="timers"><timer :status="status"  @toggleStatus="toggleStatus"></timer></span>
 			</div>
 
 			<div class="test-content">
 				<ul>
-					<li class="queslist" v-for="(item, index1) in testlist"> 
+					<li class="queslist" v-for="(item, index1) in testlist" :key="item.id"> 
 						<span class="ques-type">{{(index1+1) + ' ' +item.type}}</span>
 						<span class="que-title">{{item.question}}</span>
 						<ul>
-							<li class="optionlist" v-for="(options, index) in item.options">
+							<li class="optionlist" v-for="(options, index) in item.options" :key="options.id">
 								<span class="radio" @click="showanswer(index1,index)">
 									<span class="radio-content" 
 									      v-show="titlenum === index1 && ansnum === index || ansArray[index1] === options.icon">
@@ -36,7 +24,7 @@
 								<span class="list-content">{{options.contents}}</span>
 							</li>
 							<div class="correctAns"
-								 v-show="overFlag && ansArray[index1] && correctArray[index1].icon !== ansArray[index1]">
+								 v-show="status===2 && ansArray[index1] && correctArray[index1].icon !== ansArray[index1]">
 								 <div class="cor-content">
 									<span>你的答案: {{ansArray[index1] === -1 ? '' : ansArray[index1]}}</span>
 									<span>正确答案：{{correctArray[index1].icon}}</span>
@@ -48,22 +36,29 @@
 				</ul>
 			</div>
 
-			<div class="test-footer">
-				<p><span>上一条</span> <a href="">无</a></p>
-				<p><span>下一条</span> <a href="">HTML表单</a></p>
-			</div>
+		<div style="padding:40px">
+			<back></back>
 		</div>
-		<div class="cover"></div>
-		<div class="tip"></div>
+		</div>
+		<div class="cover" v-show="showDialogs"></div>
+		<div class="tip" v-show="showDialogs" ref="dialog">
+			<dialog-block :message="message"  
+						  :showDialogs="showDialogs"
+						  @toggleStatusDialog="toggleStatusDialog">
+			</dialog-block>
+		</div>
 	</div>
 </template>
 
 <script>
+import DialogBlock from '../components/Dialog'
+import Back from '../components/back'
+import Timer from '../components/timer'
 export default {
 	data() {
 		return {
-			startstatus: true,
-			overFlag:false,
+      		screenWidth:document.body.clientWidth,
+			status: 0,
 			testlist:[
 				{
 					type: '选择题',
@@ -122,48 +117,65 @@ export default {
 					icon: 'D',
 					reason: 'dhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpo'
 				}
-			]
+			],
+			showDialogs: false,
+			message:''
 		}
+	},
+	components: {
+		DialogBlock,
+		Back,
+		Timer
 	},
 	computed: {
-		status() {
-			if (this.startstatus) {
-				return 'trangle1'
-			}
-			if (this.overFlag) {
-				return 'over'
-			}
-		}
 	},
 	methods: {
-		toggleStatus() {
-			this.startstatus = !this.startstatus
-		},
 		toggleOverStatus() {
-			this.overFlag = true
-			let len = this.testlist.length
-			for(let i = 0;i < len;i++) {
-				if(this.ansArray[i] == null) {
-					this.ansArray[i] = -1
-					console.log('还有试题没写完')
+		},
+		toggleStatusDialog(status) {
+			this.showDialogs = status
+			document.documentElement.style.overflow ='scroll'
+			document.documentElement.style.paddingRight = 0 + 'px'
+		},
+		toggleStatus (status) {
+			this.status = status
+			if(this.status === 2){
+				let len = this.testlist.length
+				for(let i = 0;i < len;i++) {
+					if(this.ansArray[i] == null) {
+						this.ansArray[i] = -1
+						this.message = '还有试题没写完'
+						this.status = 1
+						this.showDialogItem()
+						return
+					}
 				}
 			}
-			console.log(this.ansArray)
 		},
 		showanswer (index1,index){
 			// console.log(index1 , index)
-			if(this.startstatus) {
-				console.log('请点击开始按钮')
+			if(this.status === 0) {
+				this.message = '请点击开始按钮'
+				this.showDialogItem()
 				return
 			}
-			if(this.overFlag) {
+			if(this.status === 2) {
 				console.log('已结束测试')
 				return
 			}
 			this.titlenum = index1
 			this.ansnum = index
 			this.ansArray[index1] = this.testlist[index1].options[index].icon
+		},
+		showDialogItem () {
+			this.showDialogs = true;
+			document.documentElement.style.overflow ='hidden'
+			document.documentElement.style.paddingRight = 17 + 'px'
+			this.$refs.dialog.style.left = (this.screenWidth/2 - 200)+'px'
+			console.log(this.message)
 		}
+	},
+	mounted() {
 	}
 }
 </script>
@@ -185,7 +197,7 @@ export default {
 		border-width: 12px;
 		position: absolute;
 		top: 13px;
-		left: 0px;
+		left: -9px;
 		border-style: solid;
 		border-color: transparent #EA7E5c transparent transparent;
 	}
@@ -208,35 +220,13 @@ export default {
 	.test-title span:first-child{
 		font-size: 28px
 	}
-	.test-title span:last-child{
+
+	.timers{
 		float: right;
-		color: gray;
-		font-size: 15px;
-	}
-	.pause{
-		color: #EA7E5c !important;
-		font-size: 23px;
-		position: absolute;
-		right: 130px;
-	}
-	.over {
-	    width: 24px;
-	    height: 24px;
-	    background-color: #EA7E5c;
-	    position: absolute;
-	    right: 120px;
-	    top:22px;
-	}
-	.trangle1{
-		content: '';
-		width:0;
-		height: 0;
-		border-width: 18px;
-		position: absolute;
-		top:13px;
-		right: 100px;
-		border-style: solid;
-		border-color: transparent transparent transparent #EA7E5c;
+		line-height: 50px;
+		height: 50px;
+		padding-top: 10px;
+		display: inline-block;
 	}
 
 	/*question*/
@@ -325,20 +315,26 @@ export default {
 
 
 	/*底部*/
-	.test-footer {
-		padding: 40px;
+
+	.tip{
+		width: 400px;
+		height: 200px;
+		background-color: white;
+		position: absolute;
+		top:50%;
+		margin-top: -100px;
+		left:50%;
+		z-index: 100;
 	}
-	.test-footer span {
-		background-color: #EA7E5c;
-		display: inline-block;
-		color: white;
-		padding:3px 10px;
-		border-radius: 4px;
-	}
-	.test-footer a{
-		display: inline-block;
-		margin-left: 30px;
-		color: black;
-		text-decoration:none;
+	
+	.cover{
+		position:absolute;
+		width:100%;
+		height:100%;
+		background:gray;
+		z-index:50;
+		top:0;
+		left:0;
+		opacity:0.5;
 	}
 </style>

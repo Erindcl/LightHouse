@@ -9,11 +9,11 @@
         <div class="art_title">{{article.title}}</div>
         <div class="art_infor type_infor">
           类别:
-          <span :key="index" v-for="(oneType, index) in article.type">{{oneType}}</span>
+          <span :key="index" v-for="(oneType, index) in article.category">{{oneType}}</span>
         </div>
         <div class="art_infor other_infor">
-          发布时间： {{article.time}}
-          <span>浏览量： {{article.watcher}}</span>
+          发布时间： {{article.date}}
+          <span>浏览量： {{article.browsings}}</span>
         </div>
       </div>
       <div class="art_text" v-html="article.text">
@@ -27,24 +27,64 @@
   </div>
 </template>
 <script>
+  import axios from 'axios'
+  import qs from 'qs'
   export default {
     data () {
       return {
         article: {
           title: '标题标题标日当你问你哦',
           text: 'solid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、g<br>roove lid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted<br> 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边框由点组成、dash 边框<br>由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove lid 边框由实线组成、dotted 边<br>框由点组成、dash 边框由短线组成、double 边框由双实线组成、groove 边框带有立体感的沟槽、ridge 边框成畸形、inset 边框内嵌一个立方体边框、outset 边框外嵌一个立方体--<br>经常可以在网页上看到很多漂亮的虚线，今天我也研究了一下它的实现方式，',
-          type: ['前端', 'JS', 'Vue'],
-          time: '2018-03-28',
-          watcher: 25,
+          category: ['前端', 'JS', 'Vue'],
+          date: '2018-03-28',
+          browsings: 25,
           userName: 'xxxxxx',
           userhp: '../../static/images/hp1.png'
         }
       }
     },
+    created () {
+      this.getOneArt();
+      this.menun();
+    },
     methods: {
+      menun () {
+        window.scrollTo(0, 0);
+      },
+      getOneArt () {
+        const self = this;
+        // console.log(self.GetQueryString('title'));
+        axios.post('http://192.168.5.101:8080/goc/resources/showByTitle', qs.stringify({"title": self.GetQueryString('title')}), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
+          console.log('当前文章信息获取 服务器连接成功');
+          self.article = res.data;
+          self.article.category = res.data.category.split(";");
+          self.article.userName = res.data.writer;
+          self.article.userhp = '../../static/images/' + res.data.head;
+        })
+        .catch(function (err) {
+          console.log('当前文章信息获取 服务器连接错误，原因：' + err);
+        })
+      },
       goBack () {
         window.history.go(-1);
+      },
+      GetQueryString(name) {
+        var reg = new RegExp('(\\\\?|\\\\&)' + name + '=([^\\\\&]+)');
+        var reg2 = new RegExp('([^=]+)$');
+        var r = window.location.href.match(reg);
+        if (r != null) {
+          return r[0].match(reg2)[0];
+        } else {
+          return null;
+        }
       }
+    },
+    mounted () {
+      window.addEventListener('scroll', this.menu);
     }
   }
 </script>

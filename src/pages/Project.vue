@@ -9,16 +9,16 @@
       <div class="project_title">{{project.title}}</div>
       <div class="one_module">
         <div class="type_label">需求</div>
-        <div class="describe_box" v-html="project.needed"></div>
+        <div class="describe_box" v-html="project.function"></div>
       </div>
       <div class="one_module">
         <div class="type_label">知识点</div>
-        <div class="describe_box" v-html="project.knowledge"></div>
+        <div class="describe_box" v-html="project.point"></div>
       </div>
       <div class="btn_box" style="justify-content:center;">
         <div class="func_btn" v-show="nowStatus == 0" @click="startDo">开始实践</div>
         <div class="func_btn" v-show="nowStatus == 1" @click="changeModelStatus('open')">上传结果</div>
-        <div class="func_btn" v-show="nowStatus == 2">查看作品</div>
+        <div class="func_btn" v-show="nowStatus == 2"><a :href="projectResultSrc" class="watch_result">查看作品</a></div>
       </div>
       <!-- <div class="btn_box">
         <div class="func_btn">查看作品</div>
@@ -26,7 +26,7 @@
     </div>
   </div>
   <!-- 项目上传模态框 -->
-  <div class="upload_model" v-show="showModel" :style="{ width: clientWidth + 'px', height: clientHeight + 'px' }">
+  <div class="upload_model" v-show="showModel" :style="{ width: this.windowClient.width + 'px', height: this.windowClient.height + 'px' }">
     <div class="center_box">
       <div class="level_box" style="margin-top:35px">
         <div class="step_title"><span>*</span>github(源码)地址：</div>
@@ -69,35 +69,69 @@
 </div>
 </template>
 <script>
+  import axios from 'axios'
+  import qs from 'qs'
   export default {
     data () {
       return {
+        windowClient: {},
+        projectResultSrc: '',
         project: {
+          id: '',
           title: '项目名称项目名称',
-          needed: '企业要明确的需求不可单一理解为明确要管理什么，而是对要管理的目标怎样实现。整个过程强调的是管理的目标的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同和管理的方法之间的关系，只有立足在这个关系的基础上，才可以保证做到真正明确需求。 当企业有信息化方面的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同的一条，那就是“明确需求”。由此可见，明确自己的需求在信息化选型的初期阶段是多么重要。',
-          knowledge: '企业要明确的需求不可单一理解为明确要管理什么，而是对要管理的目标怎样实现。整个过程强调的是管理的目标的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同和管理的方法之间的关系，只有立足在这个关系的基础上，才可以保证做到真正明确需求。 当企业有信息化方面的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同的一条，那就是“明确需求”。由此可见，明确自己的需求在信息化选型的初期阶段是多么重要。'
+          function: '企业要明确的需求不可单一理解为明确要管理什么，而是对要管理的目标怎样实现。整个过程强调的是管理的目标的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同和管理的方法之间的关系，只有立足在这个关系的基础上，才可以保证做到真正明确需求。 当企业有信息化方面的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同的一条，那就是“明确需求”。由此可见，明确自己的需求在信息化选型的初期阶段是多么重要。',
+          point: '企业要明确的需求不可单一理解为明确要管理什么，而是对要管理的目标怎样实现。整个过程强调的是管理的目标的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同和管理的方法之间的关系，只有立足在这个关系的基础上，才可以保证做到真正明确需求。 当企业有信息化方面的项目规划时，企业经常会得到来自很多方面的意见，以指导企业在选型的初期应该怎样做。其中，肯定会有共同的一条，那就是“明确需求”。由此可见，明确自己的需求在信息化选型的初期阶段是多么重要。'
         },
         nowStatus: 0,
         // nowTime: '',
         showModel: false,
-        clientWidth: 0,
-        clientHeight: 0,
         myproject: {
           githubSrc: '',
           textDescribe: '',
           fileType: 'image',
           filesSrc: []
-        }
+        },
+        myFiles: new window.FormData()
       }
     },
+    created () {
+      this.getProjectInfor();
+      this.menun();
+    },
     methods: {
+      // 通过URL中的id从后台获取项目需求
+      getProjectInfor () {
+        const self = this;
+        // console.log(qs.stringify({'id': self.GetQueryString('id')}));
+        axios.post('http://192.168.5.101:8080/goc/project/projects', qs.stringify({'id': self.GetQueryString('id')}), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
+          console.log('项目详情 服务器连接成功');
+          console.log(res.data);
+          self.project = res.data.projects;
+          self.nowStatus = res.data.state;
+        })
+        .catch(function (err) {
+          console.log('项目详情 服务器连接错误，原因：' + err);
+        })
+      },
       goBack () {
         window.history.go(-1);
       },
       startDo () {
         this.nowStatus = 1;
-        // this.nowTime = new Date();
-        // console.log(this.nowTime); // 后期需将开始的时间传给后台记录
+        axios.post('http://192.168.5.101:8080/goc/project/insertProject', qs.stringify({'id': self.GetQueryString('id')}), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
+          console.log('申请接受项目 服务器连接成功');
+        })
+        .catch(function (err) {
+          console.log('申请接受项目 服务器连接错误，原因：' + err);
+        });
       },
       changeModelStatus (str) {
         if (str == 'open') {
@@ -112,11 +146,31 @@
       },
       // 上传项目信息
       uploadProject () {
-        console.log('项目地址' + this.myproject.githubSrc);
-        console.log('项目描述' + this.myproject.textDescribe);
-        console.log('演示文件' + this.myproject.filesSrc);
+        const self = this;
+        // let sendData = {
+        //   projectid: self.project.id, 
+        //   githubSrc: self.myproject.githubSrc, 
+        //   textDescribe: self.myproject.textDescribe, 
+        //   fileType: self.myproject.fileType, 
+        //   filesSrc: self.myproject.filesSrc
+        // };
+        self.myFiles.append('projectid', self.GetQueryString('id'));
+        self.myFiles.append('githubSrc', self.myproject.githubSrc);
+        self.myFiles.append('textDescribe', self.myproject.textDescribe);
+        self.myFiles.append('fileType', self.myproject.fileType);
+        axios.post('http://192.168.5.101:8080/goc/project/addProject', self.myFiles, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }).then(function (res) {
+          console.log('上传项目 服务器连接成功');
+        })
+        .catch(function (err) {
+          console.log('上传项目 服务器连接错误，原因：' + err);
+        });
         this.showModel = false;
         this.nowStatus = 2;
+        this.projectResultSrc = '#/comshow/projectshow?id=' + self.GetQueryString('id');
       },
       //获取文件路径和文件名保存在我的项目对象里
       uploadFile () {
@@ -134,8 +188,10 @@
           if (thisFileType ==  this.myproject.fileType) {
             if (thisFileType == 'image') {
               oDiv.innerHTML = `<img style="height: 20px;vertical-align: middle;margin-right: 5px;" src="../../static/icons/img_file.png" alt=""><span style="font-size: 10px;display: inline-block;width: 100px;height: 30px;line-height: 30px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #999999;">` + fileList[i].name + `</span>`;
+              this.myFiles.append('image' + i, fileList[i]);
             } else {
               oDiv.innerHTML = `<img style="height: 20px;vertical-align: middle;margin-right: 5px;" src="../../static/icons/video_file.png" alt=""><span style="font-size: 10px;display: inline-block;width: 100px;height: 30px;line-height: 30px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #999999;">` + fileList[i].name + `</span>`;
+              this.myFiles.append('video' + i, fileList[i]);
             }
           } else {
             oDiv.innerHTML = `<img style="height: 20px;vertical-align: middle;margin-right: 5px;" src="../../static/icons/file_notKnow.png" alt=""><span style="font-size: 10px;display: inline-block;width: 100px;height: 30px;line-height: 30px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;color: #999999;">文件格式不正确！</span>`;
@@ -152,12 +208,43 @@
           showFiles.appendChild(oDiv);
 	        this.myproject.filesSrc.push(window.URL.createObjectURL(fileList[i]));
         }
-        // console.log(this.myproject.filesSrc);
+      },
+      // 获取URL中参数的内容
+      GetQueryString(name) {
+        var reg = new RegExp('(\\\\?|\\\\&)' + name + '=([^\\\\&]+)');
+        var reg2 = new RegExp('([^=]+)$');
+        var r = window.location.href.match(reg);
+        if (r != null) {
+          return r[0].match(reg2)[0];
+        } else {
+          return null;
+        }
+      },
+      client () {
+        if (window.innerHeight !== undefined) {
+          return {
+            "width": window.innerWidth,
+            "height": window.innerHeight
+          }
+        } else if (document.compatMode === "CSS1Compat") {
+          return {
+            "width": document.documentElement.clientWidth,
+            "height": document.documentElement.clientHeight
+          }
+        } else {
+          return {
+            "width": document.body.clientWidth,
+            "height": document.body.clientHeight
+          }
+        }
+      },
+      menun () {
+        window.scrollTo(0, 0);
       }
     },
     mounted () {
-      this.clientHeight = `${window.screen.availHeight}`;
-      this.clientWidth = `${window.screen.availWidth}`;
+      window.addEventListener('scroll', this.menu);
+      this.windowClient = this.client();
     }
   }
 </script>
@@ -210,6 +297,10 @@
     margin: 0 auto;
     font-size: 18px;
     /* background: saddlebrown; */
+  }
+  .watch_result{
+    color:#fff;
+    text-decoration: none;
   }
   .one_module{
     /* height: 400px; */

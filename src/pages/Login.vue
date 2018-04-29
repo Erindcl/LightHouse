@@ -73,7 +73,7 @@
     </div>
   </div>
   <!-- 提示弹框 -->
-  <div class="alert_box" v-show="showAlert" :style="{ width: clientWidth + 'px', height: clientHeight + 'px' }">
+  <div class="alert_box" v-show="showAlert" :style="{ width: this.windowClient.width + 'px', height: this.windowClient.height + 'px' }">
     <div class="center_box">
       <div class="notice_text">{{alertInfor}}</div>
       <div class="ok_btn">
@@ -85,19 +85,19 @@
 </template>
 <script>
 import axios from 'axios'
+import qs from 'qs'
 export default {
   data () {
     return {
       showAlert: false,
       alertInfor: '登录成功！！！',
       aHref: 'javascript:;',
-      clientHeight: 0,
-      clientWidth: 0,
+      windowClient: {},
       isLogin: true,
       leftDistance: 70,
       isShakeL: false,
       isShakeR: false,
-      yanzhensrc: 'goc/VerifyCodeServlet',
+      yanzhensrc: 'http://192.168.5.101:8080/goc/servlet/VerifyCodeServlet',
       oldUser: {
         phone: "",
         password: "",
@@ -145,22 +145,26 @@ export default {
     },
     // 登录触发函数
     loginFun () {
-      console.log(this.oldUser);
-      axios.post('goc/user/login', this.oldUser, {
+      // console.log(this.oldUser);
+      const self = this;
+      axios.post('http://192.168.5.101:8080/goc/user/login', qs.stringify(self.oldUser), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
-      }).then(function (data) {
+      }).then(function (res) {
         // 登录成功 弹框显示成功 点确认进入用户登入后的主页
         // 登录未成功 弹框显示原因 点确认关闭弹框
-        console.log('点击登录后台返回的信息：' + data);
-        if (data.notice === '登陆成功') {
-          this.alertInfor = '登陆成功!';
-          this.aHref = 'http://localhost:8080/#/comshow/indexuser';
+        if (res.data.notice === '登陆成功') {
+          self.alertInfor = '登陆成功!';
+          if (res.data.direction == '未选择方向') {
+            self.aHref = '#/regandlog/chooseroud';
+          } else {
+            self.aHref = '#/comshow/indexuser';
+          }
         } else {
-          this.alertInfor = data;
+          self.alertInfor = res.data.notice;
         }
-        this.showAlert = true;
+        self.showAlert = true;
       })
       .catch(function (err) {
         console.log('登录 服务器连接错误，原因：' + err);
@@ -178,35 +182,59 @@ export default {
         this.showAlert = true;
         console.log(this.alertInfor);
       } else {
-        axios.post('goc/user/register', this.newUser, {
+        const self = this;
+        axios.post('http://192.168.5.101:8080/goc/user/register', qs.stringify(self.newUser), {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
           }
-        }).then(function (data) {
+          // withCredentials: true
+        }).then((res) => {
           // 注册成功 弹框显示成功现在快去注册吧 点确认进入登录页面（貌似只能手动跳转）
           // 注册失败 弹框显示原因 点确认关闭弹框
-          console.log('点击注册后台返回的信息：' + data);
-          if (data.notice === '注册成功!') {
-            this.alertInfor = '注册成功，可以去登录了！';
-            this.aHref = 'http://localhost:8080/#/regandlog/login';
+          console.log('点击注册后台返回的信息：');
+          console.log(res.data);
+          if (res.data === '注册成功') {
+            self.alertInfor = '注册成功，可以去登录了！';
+            self.aHref = '#/regandlog/login';
+            self.newUser.phone = "";
+            self.newUser.password = "";
+            self.newUser.passwordS = "";
+            self.newUser.verifycode = "";
           } else {
-            this.alertInfor = data;
+            self.alertInfor = res.data;
           }
-          this.showAlert = true;
+          self.showAlert = true;
         })
-        .catch(function (err) {
+        .catch((err) => {
           console.log('注册 服务器连接错误，原因：' + err);
         })
       }
     },
     // 重新修改验证码
     reloadCode () {
-        this.yanzhensrc = 'VerifyCodeServlet?' + Math.random();
+        this.yanzhensrc = 'http://192.168.5.101:8080/goc/servlet/VerifyCodeServlet?' + Math.random();
+    },
+    client () {
+        if (window.innerHeight !== undefined) {
+          return {
+            "width": window.innerWidth,
+            "height": window.innerHeight
+          }
+        } else if (document.compatMode === "CSS1Compat") {
+          return {
+            "width": document.documentElement.clientWidth,
+            "height": document.documentElement.clientHeight
+          }
+        } else {
+          return {
+            "width": document.body.clientWidth,
+            "height": document.body.clientHeight
+          }
+        }
       }
   },
   mounted () {
-    this.clientHeight = `${window.screen.availHeight}`;
-    this.clientWidth = `${window.screen.availWidth}`;
+    this.windowClient = this.client();
   }
 };
 </script>

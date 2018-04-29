@@ -14,7 +14,7 @@
   				<p><span class="userinfo">{{userinfo.info}}</span></p>
   			</div>
   			<div class="editbtn">
-  				<input type="button" value="编辑个人资料">
+  				<input type="button" @click="showDialogItem" value="编辑个人资料">
   			</div>
   		</div>
   	</div>
@@ -30,7 +30,7 @@
   		</div>
   		<div class="mid mid-right">
   			<div class="nosummary" v-if="!editsummary && todaySummary && !DaySummary">
-	  			<p>你还没有总结哦~</p>
+	  			<p >你还没有总结哦~</p>
 	  			<button class="sumbtn" @click="editsum">小结</button>
   			</div>
   			<div class="editsummary" v-if="editsummary">
@@ -45,13 +45,14 @@
   				<button class="confirmbtn" @click="addsummary">确认</button>
   			</div>
   			<div class="hasSummary" v-if="DaySummary">
-  				<p><span class="s-tit">自我评分</span>
+  				<p>
+					<span class="s-tit">自我评分</span>
   					<span class="score">{{DaySummaryArrays[dateClick.month-1].summarys[dateClick.day-1].score}}</span>分
   				</p>
   				<p>
   					<span class="s-tit">个人小结</span>
   					<div class="detail">{{DaySummaryArrays[dateClick.month-1].summarys[dateClick.day-1].detail}}</div>
-  				</p>
+			    </p>
   			</div>
   		</div>
   	</div>
@@ -59,16 +60,23 @@
   	<div class="personal-bottom">
   		<ul class="tab-title">
   			<li v-for="(item, index) in personalTab" 
+			  	:key="item"
   				:class="{active: currentIndex === index}" 
   				@click="toggleTab(index)">{{item}}</li>
   		</ul>
   		<div class="tab-content" >
-  			<div v-show="currentIndex === 0">11</div>
+  			<div v-show="currentIndex === 0">
+					<now-learning></now-learning>
+				</div>
   			<div v-show="currentIndex === 1">
   				<study-record></study-record>
   			</div>
-  			<div v-show="currentIndex === 2">33</div>
-  			<div v-show="currentIndex === 3">44</div>
+  			<div v-show="currentIndex === 2">
+					<do-roud></do-roud>
+				</div>
+  			<div v-show="currentIndex === 3">
+					<study-plan></study-plan>
+				</div>
   			<div v-show="currentIndex === 4">
   				<system-message></system-message>
   			</div>
@@ -85,6 +93,9 @@
 import Calendar from '../components/calendar'
 import studyRecord from '../components/studyRecord'
 import systemMessage from '../components/systemMessage'
+import nowLearning from '../components/nowLearning'
+import studyPlan from '../components/studyPlan'
+import doRoud from '../components/doRoud'
 export default {
     data () {
       return {
@@ -159,7 +170,10 @@ export default {
     components: {
     	Calendar,
     	studyRecord,
-    	systemMessage
+			systemMessage,
+			nowLearning,
+			studyPlan,
+			doRoud
     },
     computed: {
     	todaySummary() {
@@ -179,7 +193,7 @@ export default {
       	// document.documentElement.style.overflow='hidden';
       },
       OndateClick(dateClick){
-    	this.DaySummaryArray()
+    	  this.DaySummaryArray()
       	// console.log(this.DaySummary)
       	this.dateClick = dateClick
       	this.summary.forEach(item => {
@@ -208,7 +222,7 @@ export default {
       	this.editsummary = true
       },
       addsummary() {
-    	this.DaySummaryArray()
+    	  this.DaySummaryArray()
       	this.editsummary = false
       	this.DaySummary = true
       	let a = {
@@ -242,6 +256,7 @@ export default {
     		})()
     	},
     	this.DaySummaryArray()
+      console.log("11" + this.DaySummary)
     },
     watch: {
     	screenWidth (val) {
@@ -439,14 +454,13 @@ export default {
 		height:50px;
 		line-height:50px;
 		cursor:pointer;
-		// transition: all 0.5s 
 	}
 	.active{
 		border-bottom:3px solid #6ABA9C;
 	}
 	.tab-content{
 		background:white;
-		min-height:590px;
+		min-height:350px;
 	}
 
 	/*对话框*/

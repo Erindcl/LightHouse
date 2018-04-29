@@ -170,8 +170,8 @@ export default {
     background-color: #e6e6e6
 }
 .calen-title span{
-    height: 30px;
-    line-height: 30px
+    height: 40px;
+    line-height: 40px
 }
 .disabled{
     color:#e6e6e6;
@@ -184,7 +184,7 @@ export default {
     float: left;
     background:transparent;
     border:0px;
-    line-height:28px;
+    line-height:38px;
     font-size:17px;
     cursor:pointer;
     padding-left:10px;
@@ -198,7 +198,7 @@ export default {
     float: right;
     background:transparent;
     border:0px;
-    line-height:28px;
+    line-height:38px;
     font-size:17px;
     padding-right:10px;
     cursor:pointer

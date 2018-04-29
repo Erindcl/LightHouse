@@ -20,10 +20,17 @@
                 <img src="../../static/icons/phoneBig.png" alt="" class="image_auto">
               </router-link>
             </div>
-            <div class="one_link" style="width: 50px; height:50px; border: 4px solid rgba(0,0,0,0);">
-              <router-link to="/comshow/personal">
+            <div class="one_link" style="position: relative; width: 40px; height:40px; border: 4px solid rgba(0,0,0,0); margin-right: 5px;">
+              <!-- <a to="/comshow/personal"> -->
+              <a href="javaScript:;">
                 <img :src="userHp" alt="用户头像" class="image_auto" style="border-radius: 25px;" @click="changeShowIndex('person')">
-              </router-link>
+              </a>
+              <div class="user_operate" v-show="showUO">
+                <ul>
+                  <li @click="closeSO('person')"><router-link to="/comshow/personal">个人中心</router-link></li>
+                  <li @click="closeSO('exit')"><router-link to="/regandlog/login">退出登录</router-link></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -58,12 +65,14 @@
   </div>
 </template>
 <script>
+  import axios from 'axios'
   export default {
     data () {
       return {
         userHp: '../../static/images/hp1.png',
         isShowIndex: true,
-        isShowResource: false
+        isShowResource: false,
+        showUO: false
       }
     },
     methods: {
@@ -75,10 +84,46 @@
           this.isShowIndex = false;
           this.isShowResource = true;
         } else {
-          this.isShowIndex = false;
-          this.isShowResource = false;
+          this.showUO = !this.showUO;
         }
+      },
+      closeSO (str) {
+        if (str == 'exit') {
+          this.quitNow();
+        }
+        this.showUO = false;
+        this.isShowIndex = false;
+        this.isShowResource = false;
+      },
+      // 导航栏内推出登录
+      quitNow () {
+        axios.post('http://192.168.5.101:8080/goc/user/exitUser', {}, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
+          console.log('用户退出成功');
+        })
+        .catch(function (err) {
+          console.log('用户退出 服务器连接错误，原因：' + err);
+        })
       }
+    },
+    mounted () {
+      const self = this;
+      axios.post('http://192.168.5.101:8080/goc/nabar/getuser', {}, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        }
+      }).then(function (res) {
+        // 登录成功 弹框显示成功 点确认进入用户登入后的主页
+        // 登录未成功 弹框显示原因 点确认关闭弹框
+        console.log('导航栏用户信息获取成功');
+        self.userHp = '../../static/images/' + res.data.head;
+      })
+      .catch(function (err) {
+        console.log('导航栏用户信息获取 服务器连接错误，原因：' + err);
+      })
     }
   }
 </script>
@@ -145,6 +190,37 @@
     font-size: 18px;
     text-decoration: none;
   }
+  .user_operate{
+    width: 110px;
+    height: 90px;
+    background: #778495;
+    position: absolute;
+    top: 50px;
+    right: -10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    z-index: 50;
+  }
+  .user_operate ul li{
+    height: 40px;
+    line-height: 40px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    color: #fff;
+  }
+  .user_operate ul li a{
+    color: #fff;
+    font-size: 14px;
+    /* font-weight: 600; */
+    text-decoration: none;
+  }
+  .user_operate ul li a:hover{
+    color: #EA7C5A;
+  }
+
   .footer{
     width: 100%;
     height: 150px;

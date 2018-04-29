@@ -11,12 +11,12 @@
         </div>
         <div class="one_day" :key="index" v-for="(oneS, index) in summary" @click="changeShowDN(index)">
           <div class="on_date">
-            {{oneS.date}}
+            {{datenums[4-index]}}
           </div>
-          <div class="sign_in" v-show="oneS.isSignIn">
+          <div class="sign_in" v-show="isSignIn[index] == '1'">
             <img src="../../static/icons/signIn.png" alt="" class="image_auto">
           </div>
-          <div class="not_sign" v-show="index == 4 && !oneS.isSignIn" @click="changeSign(index)">
+          <div class="not_sign" v-show="index == 4 && isSignIn[index] == '0'" @click="changeSign(index)">
             签到
           </div>
         </div>
@@ -43,14 +43,14 @@
       </div>
       <!-- 小结内容 -->
       <div class="one_summary_box">
-        <div class="center_content" v-show="showDayNoteType == 'some'">
-          <div><div class="green_box">自我评分</div><span>{{showSelfRating}}.0</span> 分</div>
-          <div style="margin-top: 10px;"><div class="green_box">个人小结</div>{{showDayNote}}</div>
+        <div class="center_content" v-show="showdaysummaryType == 'some'">
+          <div><div class="green_box">自我评分</div><span>{{showscore}}.0</span> 分</div>
+          <div style="margin-top: 10px;"><div class="green_box">个人小结</div>{{showdaysummary}}</div>
         </div>
-        <div class="center_content" v-show="showDayNoteType == 'todo'">
+        <div class="center_content" v-show="showdaysummaryType == 'todo'">
           <span style="color:rgba(119,132,149,0.8);">今天还未做总结哦<br>快去个人中心做总结吧!</span>
         </div>
-        <div class="center_content" v-show="showDayNoteType == 'nothing'">
+        <div class="center_content" v-show="showdaysummaryType == 'nothing'">
           <span style="color:rgba(119,132,149,0.8);">这天的你可能太忙，忘记写下你的记忆了</span>
         </div>
       </div>
@@ -58,33 +58,29 @@
       <div class="module_title">
         <div class="title_box">当前学习</div>
       </div>
-      <div class="module_box">
-        <div class="usetime_advice">
-          <span class="advice_tip">
-            建议用时：{{lastTime}}天
-          </span>
-          <span class="advice_tip">
-            已用时：{{userLastTime}}天
-          </span>
+      <div class="module_box" style="height: 350px;">
+        <div class="circle_chart_box">
+          <div class="circle_chart" id="circle_contain"></div>
         </div>
-        <div class="knowledge" :key="index1" v-for="(oneLesson, index1) in lessons" >
-          <div class="chapter_name">{{oneLesson.chapterName}}</div>
-          <div class="belong_to">
-            <img src="../../static/icons/triangle.png" class="image_auto" alt="">
+        <div class="chapter_infor_box">
+          <div class="one_infor_list">
+            <span class="list_title">课&ensp;程&ensp;名：</span>
+            <span class="list_value">{{lesson.title}}</span>
           </div>
-          <div class="section_box">
-            <div class="one_section" :key="index2" v-for="(oneSection, index2) in oneLesson.sections">
-              <span>{{oneSection.sectionName}}</span>
-              <div class="enter_btn" v-show="oneSection.learnState == 'notdo'">
-                <a :href="oneSection.sectionHref">进入学习</a>
-              </div>
-              <div class="enter_btn" v-show="oneSection.learnState == 'doing'">
-                <a :href="oneSection.sectionHref">学习中 ···</a>
-              </div>
-              <div class="enter_btn" style="background: #ccc;" v-show="oneSection.learnState == 'did'">
-                <a :href="oneSection.sectionHref">已学过</a>
-              </div>
-            </div>
+          <div class="one_infor_list">
+            <span class="list_title">章&ensp;节&ensp;名：</span>
+            <span class="list_value">{{lesson.chapter.name}}</span>
+          </div>
+          <div class="one_infor_list">
+            <span class="list_title">计划用时：</span>
+            <span class="list_value">{{lesson.chapter.ctimeLength}} 天</span>
+          </div>
+          <div class="one_infor_list">
+            <span class="list_title">已经用时：</span>
+            <span class="list_value">{{lesson.chapter.ccompleted}} 天</span>
+          </div>
+          <div class="enter_btn">
+            <a :href="chapterURL">进入学习</a>
           </div>
         </div>
       </div>
@@ -100,12 +96,12 @@
             <div class="horizontal_line" style="background: rgba(0,0,0,0);width: 3px;" v-show="nowOverArt != index1"></div>
             <div class="art_infor type_infor">
               类别:
-              <span :key="index2" v-for="(oneType, index2) in oneArt.type">{{oneType}}</span>
+              <span :key="index2" v-for="(oneType, index2) in oneArt.category">{{oneType}}</span>
             </div>
             <div class="art_infor other_infor">
-              发布时间： {{oneArt.time}}
-              <span>浏览量： {{oneArt.watcher}}</span>
-              <span>赞： {{oneArt.liker}}</span>
+              发布时间： {{oneArt.date}}
+              <span>浏览量： {{oneArt.browsings}}</span>
+              <span>赞： {{oneArt.fabulous}}</span>
             </div>
           </div>
           <div class="more_box">
@@ -119,150 +115,87 @@
     </div>
   </div>
 </template>
+<script src="./static/js/echarts.common.min.js"></script>
 <script>
+  import axios from 'axios'
   export default {
     data () {
       return {
-        summary: [
+        isSignIn: ['0','1','1','1','0'],
+        datenums: ["2018-04-22","2018-04-21","2018-04-20","2018-04-19","2018-04-18"],
+        summary: [null,
           {
             date: '3月25日',
-            isSignIn: true,
-            selfRating: '9',
-            dayNote: '浏览器和W3C组织推出的如h1~h6、thead、ul、ol的HTML标签，用于在Web页面中组织对应的内容，如网页标题、表头、无序、有序列表，以达到更方便的协作及传播互联网内容。搜索引擎很好的利用了这些语义化标签抓取内容，又鉴于搜索引擎的巨大流量推荐，Web前端不得不考虑SEO，从而两者实现有益的循环，共同推进着语义化标签的使用'
-          },
-          {
-            date: '3月26日',
-            isSignIn: false,
-            selfRating: '',
-            dayNote: ''
-          },
+            score: '9',
+            daysummary: '浏览器和W3C组织推出的如h1~h6、thead、ul、ol的HTML标签，用于在Web页面中组织对应的内容，如网页标题、表头、无序、有序列表，以达到更方便的协作及传播互联网内容。搜索引擎很好的利用了这些语义化标签抓取内容，又鉴于搜索引擎的巨大流量推荐，Web前端不得不考虑SEO，从而两者实现有益的循环，共同推进着语义化标签的使用'
+          },null,
           {
             date: '3月27日',
-            isSignIn: true,
-            selfRating: '9',
-            dayNote: 'L标签的id和class属性，进一步对HTML标签进行描述，如对页脚HTML标签添加如id="footer"或者class="footer"的属性（值），以“无声”的方式在不同的前端程序员或者前后端程序员间实现交流。'
+            score: '9',
+            daysummary: 'L标签的id和class属性，进一步对HTML标签进行描述，如对页脚HTML标签添加如id="footer"或者class="footer"的属性（值），以“无声”的方式在不同的前端程序员或者前后端程序员间实现交流。'
           },
           {
             date: '3月28日',
-            isSignIn: true,
-            selfRating: '7',
-            dayNote: '但Web的发展超乎想象，起初定义的HTML语义化标签，不足以实现对Web页面各个部分的功能或位置描述，所以Web前端人员利用HTML标签的id和class属性，进一步对HTML标签进行描述，如对页脚HTML标签添加如id="footer"或者class="footer"的属性（值），以“无ass属性，进一步对HTML标签进行描述，如对页脚HTML标签添加如id="footer"或者class="footer"的属性（值），以“无声”的方式在不同的前端程序员或者前后端程序员间实现交流。'
-          },
-          {
-            date: '3月29日',
-            isSignIn: false,
-            selfRating: '',
-            dayNote: ''
-          },
+            score: '7',
+            daysummary: '但Web的发展超乎想象，起初定义的HTML语义化标签，不足以实现对Web页面各个部分的功能或位置描述，所以Web前端人员利用HTML标签的id和class属性，进一步对HTML标签进行描述，如对页脚HTML标签添加如id="footer"或者class="footer"的属性（值），以“无ass属性，进一步对HTML标签进行描述，如对页脚HTML标签添加如id="footer"或者class="footer"的属性（值），以“无声”的方式在不同的前端程序员或者前后端程序员间实现交流。'
+          }
         ],
         // 207  348  489  （+141） 
         triangleLeft: 630,
-        showDayNote: '',
-        showDayNoteType: 'some',
-        showSelfRating: 0,
+        showdaysummary: '',
+        showdaysummaryType: 'some',
+        showscore: 0,
         lastTime: 80,
         userLastTime: 31,
-        lessons: [
-          {
-            chapterName: 'html',
-            sections: [
-              {
-                sectionName: 'html基础',
-                sectionHref: '#1',
-                learnState: 'did'
-              },
-              {
-                sectionName: 'html列表',
-                sectionHref: '#2',
-                learnState: 'doing'
-              },
-              {
-                sectionName: 'html基础',
-                sectionHref: '#3',
-                learnState: 'notdo'
-              }
-            ]
-          },
-          {
-            chapterName: 'html',
-            sections: [
-              {
-                sectionName: 'html基础',
-                sectionHref: '#1',
-                learnState: 'notdo'
-              },
-              {
-                sectionName: 'html列表',
-                sectionHref: '#2',
-                learnState: 'notdo'
-              },
-              {
-                sectionName: 'html基础',
-                sectionHref: '#3',
-                learnState: 'notdo'
-              }
-            ]
-          },
-          {
-            chapterName: 'html',
-            sections: [
-              {
-                sectionName: 'html基础',
-                sectionHref: '#1',
-                learnState: 'notdo'
-              },
-              {
-                sectionName: 'html列表',
-                sectionHref: '#2',
-                learnState: 'notdo'
-              },
-              {
-                sectionName: 'html基础',
-                sectionHref: '#3',
-                learnState: 'notdo'
-              }
-            ]
+        lesson: {
+          ltimeLength: 24,
+          lcompleted: 11,
+          title: 'HTML+CSS',
+          chapter: {
+            name: 'CSS基础',
+            ctimeLength: 24,
+            ccompleted: 11
           }
-        ],
+        },
         articles: [
           {
             title: '1标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            watcher: 147,
-            liker: 57,
+            category: ['js', '前端', '大数据'],
+            date: '2018-03-22',
+            browsings: 147,
+            fabulous: 57,
             source: '#5'
           },
           {
             title: '2标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
+            category: ['js', '前端', '大数据'],
+            date: '2018-03-22',
+            browsings: 147,
+            fabulous: 57,
             source: '#5'
           },
           {
             title: '3标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
+            category: ['js', '前端', '大数据'],
+            date: '2018-03-22',
+            browsings: 147,
+            fabulous: 57,
             source: '#5'
           },
           {
             title: '4标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
+            category: ['js', '前端', '大数据'],
+            date: '2018-03-22',
+            browsings: 147,
+            fabulous: 57,
             source: '#5'
           },
           {
             title: '5标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
+            category: ['js', '前端', '大数据'],
+            date: '2018-03-22',
+            browsings: 147,
+            fabulous: 57,
             source: '#5'
           }
         ],
@@ -270,23 +203,71 @@
         horizontalLineWid: 2
       }
     },
+    computed: {
+		  chapterURL () {
+		    return '#/comshow/studypage?name=' + this.lesson.chapter.name;
+		  }
+		},
+    created () {
+      this.getAllData();
+      this.menun();
+      // this.initFunc();
+    },
     methods: {
-      changeSign (index) {
-        this.summary[index].isSignIn = true;
+      // 首页获取 签到小结 当前学习课程 资源
+      getAllData () {
+        const self = this;
+        axios.post('http://192.168.5.101:8080/goc/home/gethome', {}, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
+          console.log()
+          console.log('用户个人首页 服务器连接成功');
+          self.isSignIn = res.data.das;
+          self.datenums = res.data.datenums;
+          self.summary = res.data.daysums;
+          self.articles = res.data.hotrs;
+          console.log(self.articles);
+          
+          self.lesson.ltimeLength = res.data.ltimeLength; 
+          self.lesson.lcompleted = res.data.lcompleted; 
+          self.lesson.title = res.data.studying.tcoursename; 
+          self.lesson.chapter.name = res.data.studying.coursename; 
+          self.lesson.chapter.ctimeLength = res.data.studying.studydate; 
+          self.lesson.chapter.ccompleted = res.data.ccompleted; 
+          self.initFunc();
+        })
+        .catch(function (err) {
+          console.log('用户个人首页 服务器连接错误，原因：' + err);
+        })
+      },
+      changeSign (index) { //将用户签到了的状态提交给后台
+        this.isSignIn[index] = '1';
+        axios.post('http://192.168.5.101:8080/goc/home/addsign', {}, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
+          console.log('签到 服务器连接成功');
+        })
+        .catch(function (err) {
+          console.log('签到 服务器连接错误，原因：' + err);
+        })
       },
       // 根据日期显示当前小结
       changeShowDN (index) {
         // let nowIndex= event.currentTarget.getAttribute('myindex'); 通过自定义属性和事件对象获取当前触发元素的索引
-        if (this.summary[index].dayNote == '' || this.summary[index].selfRating == '') {
+        if (this.summary[4-index] == null) {
           if (index == 4) {
-            this.showDayNoteType = 'todo';
+            this.showdaysummaryType = 'todo';
           } else {
-            this.showDayNoteType = 'nothing';
+            this.showdaysummaryType = 'nothing';
           }
         } else {
-          this.showDayNoteType = 'some';
-          this.showDayNote = this.summary[index].dayNote;
-          this.showSelfRating = this.summary[index].selfRating;
+          this.showdaysummaryType = 'some';
+          this.showdaysummary = this.summary[4-index].daysummary;
+          this.showscore = this.summary[4-index].score;
         }
           let targetDis = 207 + 141*index;
           let timer = setInterval (() => {
@@ -322,12 +303,58 @@
             clearInterval(timer);
           }
         },10)
+      },
+      menun () {
+        window.scrollTo(0, 0);
+      },
+      initFunc () {
+        if (this.summary[1] == null) {
+          this.showdaysummaryType = 'nothing';
+        } else {
+          this.showdaysummaryType = 'some';
+          this.showdaysummary = this.summary[1].daysummary;
+          this.showscore = this.summary[1].score;
+        }
+        for (let i = 0; i < this.articles.length; i++) {
+          this.articles[i].source = '#/comshow/oneresource?title=' + this.articles[i].title;
+          this.articles[i].category = this.articles[i].category.split(";");
+        }
+      },
+      initChart () {
+        let data = [
+          {value: this.lesson.lcompleted, name: parseInt(this.lesson.lcompleted / this.lesson.ltimeLength * 100) + '%'},
+          {value: this.lesson.ltimeLength - this.lesson.lcompleted}
+        ];
+        let circleChart = echarts.init(document.getElementById('circle_contain'));
+        let option = {
+          series: [{
+            legendHoverLink: false,
+            hoverAnimation: false,
+            hoverOffset: false,
+            type:'pie',
+            radius: ['78%', '90%'],
+            color: ['#EA7C5A', '#E5E9F2'],
+            avoidLabelOverlap: false, //使圆中间的标签居中
+            label: {
+              show: true,
+              position: 'center',
+              color: '#8a8a8a',
+              fontSize: 30
+            },
+            labelLine: {
+              normal: {
+                show: false
+              }
+            },
+            data: data
+          }]
+        };
+        circleChart.setOption(option);
       }
     },
     mounted () {
-      this.showDayNote = this.summary[3].dayNote;
-      this.showSelfRating = this.summary[3].selfRating;
-      document.body.scrollTop = '0px';
+      window.addEventListener('scroll', this.menu);
+      this.initChart(); // 放在created中无用
     }
   }
 </script>
@@ -469,66 +496,42 @@
     color: #EA7C5A;
     font-weight: bold;
   }
+
   .module_box{
-    /* height: 500px; */
+    /* height: 350px; */
     width: 100%;
-    /* display: flex; */
-    /* justify-content: center; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-top: -2px;
     background: #fff;
   }
-  .usetime_advice{
-    height: 60px;
-    line-height: 60px;
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    /* background: seagreen; */
+  .circle_chart_box, .chapter_infor_box{
+    width: 450px;
+    height: 260px;
+    /* background: lightblue; */
   }
-  .advice_tip{
-    margin-right: 25px;
-    color: #999999;
-    font-size: 14px;
-  }
-  .knowledge{
-    /* height: 300px; */
-    width: 880px;
-    margin: 0 auto;
+  .chapter_infor_box{
+    margin-left: 30px;
+    justify-content: center;
     display: flex;
-    padding-bottom: 40px;
+    flex-direction: column;
+  }
+  .circle_chart{
+    height: 260px;
+    width: 260px;
+    margin: 0px auto;
     /* background: salmon; */
   }
-  .chapter_name{
+  .one_infor_list{
     height: 40px;
     line-height: 40px;
-    width: 190px;
-    font-size: 18px;
-    font-weight: bold;
-    /* background: seagreen; */
   }
-  .belong_to{
-    width: 24px;
-    height: 24px;
-    margin: 10px 0px 0px;
-    transform:rotate(-90deg);
-    -ms-transform:rotate(-90deg); 	/* IE 9 */
-    -moz-transform:rotate(-90deg); 	/* Firefox */
-    -webkit-transform:rotate(-90deg); /* Safari 和 Chrome */
-    -o-transform:rotate(-90deg); 	/* Opera */
+  .list_title{
+    color: #8a8a8a;
   }
-  .section_box{
-    width: 550px;
-    /* background: #999999; */
-    margin-left: 50px;
-  }
-  .one_section{
-    height: 40px;
-    width: 100%;
-    padding-left: 50px;
-    border-left: 3px solid #EA7C5A;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .list_value{
+    font-weight: 600;
   }
   .enter_btn{
     width: 100px;
@@ -536,7 +539,8 @@
     line-height: 30px;
     background: #EA7C5A;
     text-align: center;
-    border-radius: 5px;
+    border-radius: 3px;
+    margin-top: 15px;
   }
   .enter_btn a{
     color: #fff;

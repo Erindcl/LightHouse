@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div class="bgimg_box"><img class="imgauto" src="../../static/images/roadBg.jpg" alt=""></div>
-    <div class="choose_roud_title">路线参数选择</div>
+	<div>
     <div class="show_step">
       <div class="step_center_box">
         <div class="step_style bgcolor_green">1</div>
@@ -17,7 +15,7 @@
         <span :class="{color_grey: nowStepNum != 2, color_green: nowStepNum == 2}">学习意向定义</span>
       </div>
     </div>
-    <div class="step_content">
+		<div class="step_content">
       <!-- 第一步 -->
       <div class="content_center_box" v-show="nowStepNum == 0">
         <div class="infor_title">
@@ -143,10 +141,10 @@
           <span :class="{color_white: tsQ4 == '5-3小时', bgcolor_grey: tsQ4 == '5-3小时', color_grey: tsQ4 != '5-3小时'}" @click="saveparameter(3,4,'5-3小时')">5-3小时</span>
           <span :class="{color_white: tsQ4 == '3小时以下', bgcolor_grey: tsQ4 == '3小时以下', color_grey: tsQ4 != '3小时以下'}" @click="saveparameter(3,4,'3小时以下')">3小时以下</span>
         </div>
-        <div class="submit_all_btn" @click="changeModulStatus(true)">提交</div>
+        <div class="submit_all_btn" @click="changeModulStatus()">提交修改</div>
       </div>
     </div>
-    <!-- 往前一步（后） -->
+		<!-- 往前一步（后） -->
     <div class="page_btn_contain">
       <div class="page_btn_center">
         <div class="next_step_btn bgcolor_orange" id="next_step_bt">
@@ -161,151 +159,37 @@
         </div>
       </div>
     </div>
-    <div class="footer">
-      <div class="footer_center">
-        <div class="fc_left">
-          联系我们：
-        </div>
-        <div class="fc_right">
-          <div class="one_contact">
-            <img src="../../static/icons/qq.png" alt="">
-            <span>985718715</span>
-          </div>
-          <div class="one_contact">
-            <img src="../../static/icons/weixin.png" alt="">
-            <span>zhixinta2018</span>
-          </div>
-          <div class="one_contact">
-            <img src="../../static/icons/email.png" alt="">
-            <span>zhxinta2018@163.com</span>
-          </div>
-          <div class="one_contact">
-            <img src="../../static/icons/weibo.png" alt="">
-            <span>zhixintaguanbo</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- 提示弹框 -->
-    <div class="alert_box" v-show="showAlert" :style="{ width: this.windowClient.width + 'px', height: this.windowClient.height + 'px' }">
-      <div class="center_box">
-        <div class="notice_text">{{alertInfor}}</div>
-        <div class="ok_btn">
-          <a :href="aHref" @click="changeModulStatus(false)">确 认</a>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 <script>
-  import axios from 'axios';
-  import qs from 'qs';
   export default {
-    data () {
-      return {
-        showAlert: false,
-        alertInfor: '提交成功！！！',
-        aHref: '#/comshow/indexuser',
-        nowStepNum: 0,
+	  data() {
+		  return {
+				nowStepNum: 0,
         // 第一步当前选择
         fsQ1: '前端',
-        fsQ2: '',
+        fsQ2: 'web前端',
         // 第二步当前选择
-        ssQ1: '',
-        ssQ2: '',
-        ssQ3: '',
-        ssQ4: '',
-        ssQ5: '',
+        ssQ1: '轻松',
+        ssQ2: '没有了解过编程',
+        ssQ3: '40%以下',
+        ssQ4: '较差',
+        ssQ5: '较差',
         // 第三步当前选择
-        tsQ1: '',
-        tsQ2: '',
-        tsQ3: '',
-        tsQ4: '',
+        tsQ1: '就业需要',
+        tsQ2: '主流技术',
+        tsQ3: '看视频',
+				tsQ4: '7小时以上',
         firstStep: [],
         secondStep: [],
         thirdStep: [],
-        windowClient: {}
-      }
-    },
+		  }
+	  },
     created () {
-      this.menun()
+      this.menun(0);
     },
-    methods: {
-      // 点击进行下或上一步
-      changeStep (num) {
-        let preStepBtn = document.getElementById('pre_step_bt');
-        let nextStepBtn = document.getElementById('next_step_bt');
-        if (this.nowStepNum == 0) {
-          if (num == -1) {
-            this.nowStepNum = 0;
-          } else {
-            this.nowStepNum += 1;
-            preStepBtn.style.cursor = 'pointer';
-            preStepBtn.style.background = '#EA7C5A';
-          }
-        } else if (this.nowStepNum == 1) {
-          this.nowStepNum += num;
-        } else {
-          if (num == -1) {
-            this.nowStepNum -= 1;
-            nextStepBtn.style.cursor = 'pointer';
-            nextStepBtn.style.background = '#EA7C5A';
-          } else {
-            this.nowStepNum = 2;
-          }
-        }
-        if (this.nowStepNum == 0){
-          preStepBtn.style.cursor = 'not-allowed';
-          preStepBtn.style.background = '#7784957a';
-        }
-        if (this.nowStepNum == 2){
-          nextStepBtn.style.cursor = 'not-allowed';
-          nextStepBtn.style.background = '#7784957a';
-        }
-        this.menun();
-      },
-      // 提交用户的选择
-      changeModulStatus (str) {
-        
-        this.firstStep.push(this.fsQ1);
-        this.firstStep.push(this.fsQ2);
-
-        this.secondStep.push(this.ssQ1);
-        this.secondStep.push(this.ssQ2);
-        this.secondStep.push(this.ssQ3);
-        this.secondStep.push(this.ssQ4);
-        this.secondStep.push(this.ssQ5);
-
-        this.thirdStep.push(this.tsQ1);
-        this.thirdStep.push(this.tsQ2);
-        this.thirdStep.push(this.tsQ3);
-        this.thirdStep.push(this.tsQ4);
-
-        if (str == true) {
-          let sendData = {
-            firstStep: this.firstStep,
-            secondStep: this.secondStep,
-            thirdStep: this.thirdStep,
-          }
-          const self = this;
-          axios.post('', qs.stringify(sendData), {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-            }
-          }).then(function (data) {
-            console.log('路线制定 服务器连接成功');
-          })
-          .catch(function (err) {
-            console.log('路线制定 服务器连接错误，原因：' + err);
-          })
-        }
-
-        this.showAlert = str;
-      },
-      menun () {
-        window.scrollTo(0, 0);
-      },
-      // 用户的选择进行存储
+	  methods: {
+		  // 用户的选择进行存储
       saveparameter (stepNo, quesNo, value) {
         switch (stepNo) {
           case 1:
@@ -351,50 +235,87 @@
             }
         }
         
-      },
-      client () {
-        if (window.innerHeight !== undefined) {
-          return {
-            "width": window.innerWidth,
-            "height": window.innerHeight
+			},
+			// 点击进行下或上一步
+      changeStep (num) {
+        let preStepBtn = document.getElementById('pre_step_bt');
+        let nextStepBtn = document.getElementById('next_step_bt');
+        if (this.nowStepNum == 0) {
+          if (num == -1) {
+            this.nowStepNum = 0;
+          } else {
+            this.nowStepNum += 1;
+            preStepBtn.style.cursor = 'pointer';
+            preStepBtn.style.background = '#EA7C5A';
           }
-        } else if (document.compatMode === "CSS1Compat") {
-          return {
-            "width": document.documentElement.clientWidth,
-            "height": document.documentElement.clientHeight
-          }
+        } else if (this.nowStepNum == 1) {
+          this.nowStepNum += num;
         } else {
-          return {
-            "width": document.body.clientWidth,
-            "height": document.body.clientHeight
+          if (num == -1) {
+            this.nowStepNum -= 1;
+            nextStepBtn.style.cursor = 'pointer';
+            nextStepBtn.style.background = '#EA7C5A';
+          } else {
+            this.nowStepNum = 2;
           }
         }
+        if (this.nowStepNum == 0){
+          preStepBtn.style.cursor = 'not-allowed';
+          preStepBtn.style.background = '#7784957a';
+        }
+        if (this.nowStepNum == 2){
+          nextStepBtn.style.cursor = 'not-allowed';
+          nextStepBtn.style.background = '#7784957a';
+        }
+        this.menun(750);
+			},
+			changeModulStatus () {
+        
+        this.firstStep.push(this.fsQ1);
+        this.firstStep.push(this.fsQ2);
+
+        this.secondStep.push(this.ssQ1);
+        this.secondStep.push(this.ssQ2);
+        this.secondStep.push(this.ssQ3);
+        this.secondStep.push(this.ssQ4);
+        this.secondStep.push(this.ssQ5);
+
+        this.thirdStep.push(this.tsQ1);
+        this.thirdStep.push(this.tsQ2);
+        this.thirdStep.push(this.tsQ3);
+        this.thirdStep.push(this.tsQ4);
+
+        // let sendData = {
+        //   firstStep: this.firstStep,
+        //   secondStep: this.secondStep,
+        //   thirdStep: this.thirdStep,
+        // }
+        // const self = this;
+        // axios.post('', qs.stringify(sendData), {
+        //   headers: {
+        //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+        //   }
+        // }).then(function (data) {
+        //   console.log('路线制定 服务器连接成功');
+        // })
+        // .catch(function (err) {
+        //   console.log('路线制定 服务器连接错误，原因：' + err);
+				// })
+			  this.nowStepNum = 0;
+				this.menun(750);
+      },
+			menun (num) {
+				window.scrollTo(0, num);
       }
-    },
-    mounted () {
-      window.addEventListener('scroll', this.menu);
-      this.windowClient = this.client();
-    }
+	  },
+	  mounted () {
+			window.addEventListener('scroll', this.menu);
+      
+	  }
   }
 </script>
+
 <style scoped>
-  .imgauto{
-    width: 100%;
-    height: 100%;
-  }
-  .bgimg_box{
-    height: 200px;
-    width: 100%;
-  }
-  .choose_roud_title{
-    width: 1000px;
-    height: 70px;
-    text-align: center;
-    color: #778495;
-    font-weight: 600;
-    font-size: 22px;
-    margin: -70px auto 0px;
-  }
   .show_step{
     background: #fff;
     height: 150px;
@@ -448,7 +369,7 @@
   .step_content{
     /* height: 500px; */
     width: 100%;
-    background: #f2f2f2;
+    background: #fff;
   }
   .step_title{
     height: 50px;
@@ -457,7 +378,7 @@
     text-align: center;
   }
   .content_center_box{
-    width: 1000px;
+    width: 850px;
     margin: 0px auto;
     /* height: 500px; */
     /* display: flex; */
@@ -602,7 +523,7 @@
     /* font-weight: 300; */
   }
   .submit_all_btn{
-    width: 50px;
+    width: 70px;
     height: 30px;
     font-size: 14px;
     line-height: 30px;
@@ -618,102 +539,8 @@
     -ms-user-select: none; 
     user-select: none;
   }
-  /* 弹框样式 */
-.center_box{
-  width: 300px;
-  height: 121px;
-  background: #fff;
-}
-.alert_box{
-  background: rgba(0,0,0,0.7);
-  position: fixed;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  top:0px;
-  left: 0px;
-  z-index: 10;
-}
-.notice_text{
-  width: 100%;
-  text-align: center;
-  line-height: 70px;
-  height: 70px;
-  font-size: 17px;
-}
-.ok_btn{
-  height: 50px;
-  width: 100%;
-  border-top: 2px solid rgb(231, 231, 231);
-  text-align: center;
-  line-height: 50px;
-}
-.ok_btn a{
-  color: #ea7c5a;
-  font-weight: 600;
-  text-decoration: none;
-}
-.ok_btn:hover{
-  background: #ea7c5a;
-}
-.ok_btn a:hover{
-  color: #fff;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /* 底部样式 */
-  .footer{
+  .imgauto{
     width: 100%;
-    height: 150px;
-    background: #778495;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .footer_center{
-    width: 1000px;
-    height: 100px;
-    display: flex;
-    justify-content: space-between;
-  }
-  .fc_left{
-    /* background: salmon; */
-    font-size: 18px;
-    color: #fff;
-    width: 100px;
-    height: 50px;
-    font-weight: bold;
-    line-height: 50px;
-  }
-  .fc_right{
-    width: 850px;
     height: 100%;
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .one_contact{
-    width: 400px;
-    height: 50px;
-    line-height: 50px;
-  }
-  .one_contact img{
-    width: 30px;
-    height: 30px;
-    vertical-align: middle;
-  }
-  .one_contact span{
-    color: #fff;
-    margin-left: 10px;
   }
 </style>

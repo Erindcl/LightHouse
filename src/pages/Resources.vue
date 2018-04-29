@@ -5,10 +5,10 @@
       <div class="type_nav">
         <ul>
           <li>分类</li>
-          <li @click="changeShowDN(92)">全部</li>
-          <li @click="changeShowDN(154)">企业</li>
-          <li @click="changeShowDN(218)">资源</li>
-          <li @click="changeShowDN(295)">学习经验</li>
+          <li @click="changeShowDN(92,'全部')">全部</li>
+          <li @click="changeShowDN(154,'企业')">企业</li>
+          <li @click="changeShowDN(218,'资源')">资源</li>
+          <li @click="changeShowDN(295,'学习经验')">学习经验</li>
         </ul>
         <!-- 三角形 -->
         <div class="now_pointer">
@@ -27,12 +27,12 @@
             <div class="horizontal_line" style="background: rgba(0,0,0,0);width: 3px;" v-show="nowOverArt != index1"></div>
             <div class="art_infor type_infor">
               类别:
-              <span :key="index2" v-for="(oneType, index2) in oneArt.type">{{oneType}}</span>
+              <span :key="index2" v-for="(oneType, index2) in oneArt.category">{{oneType}}</span>
             </div>
             <div class="art_infor other_infor">
-              发布时间： {{oneArt.time}}
-              <span>浏览量： {{oneArt.watcher}}</span>
-              <span>赞： {{oneArt.liker}}</span>
+              发布时间： {{oneArt.date}}
+              <span>浏览量： {{oneArt.browsings}}</span>
+              <span>赞： {{oneArt.fabulous}}</span>
             </div>
           </div>
           <!-- 翻页 -->
@@ -49,137 +49,186 @@
   </div>
 </template>
 <script>
+  import axios from 'axios'
   export default {
     data () {
       return {
-        articles: [
-          {
-            title: '1标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            watcher: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '2标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '3标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '4标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '5标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '6标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '7标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '8标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '9标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '10标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '11标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '12标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '13标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          },
-          {
-            title: '14标题标题标题标题',
-            type: ['js', '前端', '大数据'],
-            time: '2018-03-22',
-            wather: 147,
-            liker: 57,
-            source: '#5'
-          }
-        ],
+        articles: [],
+        // articles: [
+        //   {
+        //     title: '1标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '2标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '3标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '4标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '5标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '6标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '7标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '8标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '9标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '10标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '11标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '12标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '13标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   },
+        //   {
+        //     title: '14标题标题标题标题',
+        //     category: ['js', '前端', '大数据'],
+        //     date: '2018-03-22',
+        //     browsings: 147,
+        //     fabulous: 57,
+        //     type: '企业',
+        //     source: '#5'
+        //   }
+        // ],
         nowArticles: [],
         triangleLeft: 90,
         pageCount: 3,
         nowPage: 0,
         nowOverArt: -1,
-        horizontalLineWid: 2
+        horizontalLineWid: 2,
+        showArtType: '全部'
       }
     },
     created () {
-      document.body.scrollTop = '0px';
+      this.menun();
+      this.getAllSources();
     },
     methods: {
+      menun () {
+        window.scrollTo(0, 0)
+      },
+      // 获取当前所有资源
+      getAllSources () {
+        const self = this;
+        axios.post('http://192.168.5.101:8080/goc/resources/showAllre', {}, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
+          console.log('获取所有资源 服务器连接成功');
+          // console.log(res.data);
+          let resArray = res.data;
+          let j = 0;
+          self.articles = [];
+          for (let i = 0; i < resArray.length; i++) {
+            // console.log(self.showArtType);
+            if (resArray[i].type == self.showArtType || self.showArtType == '全部') { //接受所有从所有文章中选取与当前展示类型一致的文章，且只展示这些文章
+              self.articles.push(resArray[i]);
+              self.articles[j].category = resArray[i].category.split(";");
+              j++;
+            }
+          }
+          self.initFunc();
+        })
+        .catch(function (err) {
+          console.log('获取所有资源 服务器连接错误，原因：' + err);
+        })
+      },
       // 当前显示的分类
-      changeShowDN (targetDis) {
+      changeShowDN (targetDis, artType) {
+        this.showArtType = artType;
         let timer = setInterval (() => {
           if (targetDis >= this.triangleLeft) {
             if ((targetDis - this.triangleLeft) < 10) {
@@ -197,6 +246,7 @@
             }
           }
         },10);
+        this.getAllSources();
       },
       // 翻页函数
       changePage (index) {
@@ -238,7 +288,7 @@
           nextPageBtn.style.cursor = 'not-allowed';
         }
         this.nowArticles = this.articles.slice(this.nowPage*5,(this.nowPage+1)*5);
-        document.body.scrollTop = '0px';
+        this.menun();
       },
       showThisArt (index) {
         this.nowOverArt = index;
@@ -263,21 +313,34 @@
             clearInterval(timer);
           }
         },10)
+      },
+      initFunc () {
+        let prePageBtn = document.getElementById('pre_page');
+        let nextPageBtn = document.getElementById('next_page');
+        prePageBtn.style.cursor = 'not-allowed';
+
+        //设置页数
+        this.pageCount = parseInt(this.articles.length/5);
+        if ((this.articles.length-this.pageCount*5) != 0) { 
+          this.pageCount += 1;
+        }
+
+        // 现页面真正显示的是nowArticles中的内容 此处未判断当articles.length小于5时该对nowArticles如何设置
+        if (this.articles.length > 5) {
+          this.nowArticles = this.articles.slice(0,5);
+        } else {
+          nextPageBtn.style.cursor = 'not-allowed';
+          this.nowArticles = this.articles;
+        }
+
+        // 设置某文章的URL
+        for (let i = 0; i < this.articles.length; i++) {
+          this.articles[i].source = '#/comshow/oneresource?title=' + this.articles[i].title;
+        }
       }
     },
     mounted () {
-      let prePageBtn = document.getElementById('pre_page');
-      let nextPageBtn = document.getElementById('next_page');
-      prePageBtn.style.cursor = 'not-allowed';
-      this.pageCount = parseInt(this.articles.length/5);
-      if ((this.articles.length-this.pageCount*5) != 0) {
-        this.pageCount += 1;
-      }
-      if (this.articles.length > 5) {
-        this.nowArticles = this.articles.slice(0,5);
-      } else {
-        nextPageBtn.style.cursor = 'not-allowed';
-      }
+      window.addEventListener('scroll', this.menu);
     }
   }
 </script>

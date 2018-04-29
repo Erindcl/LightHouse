@@ -1,10 +1,13 @@
 <template>
-	<div class="system-message" >
+	<div class="system_message" >
 		<div class="messgea-wrapper">
 			<ul>
-				<li class="message-detail" v-for="item in message">
-					<div class="message-date">{{item.date}}</div>
-					<div class="message-content" ref="msgcontent">{{item.content}}</div>
+				<li class="message_detail" :key="index" v-for="(item, index) in message">
+					<div class="message_date">{{item.date}}</div>
+					<div class="message_detail_right">
+						<div class="triangle_box"><img src="../../static/icons/triangle_ff.png" alt=""></div>
+						<div class="message_content">{{item.content}}</div>
+					</div>
 				</li>
 			</ul>
 		</div>
@@ -17,63 +20,68 @@ export default {
 		return {
 			message:[
 				{
-					date: '2018-2-10',
-					content: 'shwoiudhiowhdoi2'
+					date: '2018-02-10',
+					content: '由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置'
 				},
 				{
-					date: '2018-2-10',
-					content: 'shwoiudhiowhdoi2'
+					date: '2018-02-10',
+					content: '由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置'
 				},
 				{
-					date: '2018-2-10',
-					content: 'shwoiudhiowhdoi2'
+					date: '2018-02-10',
+					content: '由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置'
+				},
+				{
+					date: '2018-02-10',
+					content: '由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置由于vue是SPA开发，所以当多次跳转到统一个页面时，页面在可是窗口显示的是上一次查看的地方，此时需要设置：在生命周期钩子函数中设置'
 				}
 			]
 		}
 	},
 	methods: {
-		change() {
-			console.log(111)
-		}
+		
 	},
 	mounted () {
-		this.change()
+		
 	}
 }
 </script>
-
-<style>
-.system-message {
-	padding: 30px
+<style scoped>
+.system_message {
+	padding: 40px 50px;
 }
-.message-detail{
-	min-height: 140px;
-	margin-bottom: 20px
+.message_detail{
+	/* min-height: 140px; */
+	margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
-.message-date{
-	min-height:120px;
-	line-height: 120px;
-	float: left ;
+.message_detail_right{
+	display: flex;
+	height: 100%;
+	align-items: center;
 }
-.message-content {
-	float: left;
-	margin-left: 40px;
-	min-height: 90px;
-	width: 600px;
-	border: 4px solid #e6e6e6;
-	padding: 20px;
-	position: relative;
+.message_content{
+	line-height: 20px;
+	width: 700px;
+	background: #F2F2F2;
+	padding: 20px 25px;
 	border-radius: 3px
 }
-.message-content:before{
-	content: '';
-	width: 0px;
-	height: 0px;
-	border-width: 18px;
-	border-style: solid;
-	border-color: transparent #e6e6e6 transparent transparent ;
-	position: absolute;
-	left: -36px;
-	top: 40px;
+.message_date{
+	height: 20px;
+	line-height: 20px;
+	color: #696868;
+}
+.triangle_box{
+	width: 30px;
+	height: 30px;
+	transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+	margin-right: -8px;
 }
 </style>
