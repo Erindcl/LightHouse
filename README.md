@@ -8,5 +8,8 @@
 #引入axios
    npm install --save axios
 
+#引入qs
+   cnpm i qs  
+
 #运行
    npm run dev
