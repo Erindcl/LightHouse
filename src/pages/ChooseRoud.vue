@@ -283,12 +283,13 @@
 
         if (str == true) {
           let sendData = {
-            firstStep: this.firstStep,
-            secondStep: this.secondStep,
-            thirdStep: this.thirdStep,
+            firstStep: this.firstStep.join(';'),
+            secondStep: this.secondStep.join(';'),
+            thirdStep: this.thirdStep.join(';'),
           }
+          // console.log(sendData);
           const self = this;
-          axios.post('', qs.stringify(sendData), {
+          axios.post('http://192.168.5.101:8080/goc/route/addRoute', qs.stringify(sendData), {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
             }

@@ -28,6 +28,8 @@
   </div>
 </template>
 <script>
+import axios from 'axios'
+import qs from 'qs'
 export default {
     data(){
         return {
@@ -131,37 +133,33 @@ export default {
                 this.year++
             }
         },
-        mapDate() {
-            let copyDate = this.copyDate.map((item) => {
-                item = {
-                    summary: 'aaaaa'
-                }
-                return item
-            })
-            this.copyDate = copyDate
-        },
         hasSummary(index){
+            for (var i = 0;i < this.datelist.length;i ++) {
+                this.$refs.blocklist[i].style.border = '1px solid transparent'
+            }
+            this.$refs.blocklist[index].style.border = '1px solid #EA7C5A'
             let dateClick = {
                 year: this.year,
                 month: this.month,
                 day: (index + 1)
             }
-            this.$emit('date-click', dateClick)
-            // this.$refs.blocklist[index].style.color = 'red'
-            if(this.copyDate[index].summary === null) {
-                console.log(11111)
-            }else{
-                console.log(this.copyDate[index].summary)
-            }
+            let currentDate = (dateClick.year+'-'+dateClick.month+'-'+dateClick.day)
+            
+            axios.post('http://192.168.5.101:8080/goc/center/seldaysum',qs.stringify({
+              'date': currentDate
+            }))
+            .then( res => {
+                // console.log(currentDate)
+                let _data = res.data
+                console.log(_data)
+                // _data.date = currentDate
+                this.$emit('date-click', _data)
+            })
         }
     },
     mounted(){
         // this.getDateList(2018,4)
         this.getDays(this.year,this.month)
-        // this.$nextTick(function () {
-        //     this.resize()
-        // })
-        this.mapDate()
     }
 }
 </script>

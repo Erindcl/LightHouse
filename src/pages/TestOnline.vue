@@ -1,6 +1,9 @@
 <template>
 	<div class="test-online">
-		<a href="#" class="back"><span class="trangle"></span>返回</a>
+		<div class="go_back" @click="goBack()">
+      <div class="back_icon"><img src="../../static/icons/triangle.png" class="image_auto" alt=""/></div>
+      <div class="back_text">返回</div>
+    </div>
 		<div class="test-wrapper">
 			<div class="test-title">
 				<span>HTML</span>
@@ -9,36 +12,50 @@
 
 			<div class="test-content">
 				<ul>
-					<li class="queslist" v-for="(item, index1) in testlist" :key="item.id"> 
-						<span class="ques-type">{{(index1+1) + ' ' +item.type}}</span>
-						<span class="que-title">{{item.question}}</span>
+					<li class="queslist" v-for="(item, index) in testlist" :key="item.id">
+						<span class="ques-type"> {{ item.testid + ' ' + item.type }} </span>
+						<span class="que-title"> {{ item.title }} </span>
 						<ul>
-							<li class="optionlist" v-for="(options, index) in item.options" :key="options.id">
-								<span class="radio" @click="showanswer(index1,index)">
-									<span class="radio-content" 
-									      v-show="titlenum === index1 && ansnum === index || ansArray[index1] === options.icon">
-
-									</span>
+							<li class="optionlist">
+								<span class="radio" data-id='A' @click="handleClick($event, item.testid - 1)">
+									<span class="radio-content" v-show="ansArray[item.testid-1] == 'A'"></span>
 								</span>
-								<span class="radio-value">{{options.icon}}</span>
-								<span class="list-content">{{options.contents}}</span>
+								<span class="radio-value">A</span>
+								<span class="list-content">{{item.ansA}}</span>
 							</li>
-							<div class="correctAns"
-								 v-show="status===2 && ansArray[index1] && correctArray[index1].icon !== ansArray[index1]">
-								 <div class="cor-content">
-									<span>你的答案: {{ansArray[index1] === -1 ? '' : ansArray[index1]}}</span>
-									<span>正确答案：{{correctArray[index1].icon}}</span>
-									<p><a>解析:</a> <b>{{correctArray[index1].reason}}</b></p>
+							<li class="optionlist">
+								<span class="radio" data-id='B' @click="handleClick($event, item.testid - 1)">
+									<span class="radio-content" v-show="ansArray[item.testid-1] == 'B'"></span>
+								</span>
+								<span class="radio-value">B</span>
+								<span class="list-content">{{item.ansB}}</span>
+							</li>
+							<li class="optionlist">
+								<span class="radio" data-id='C' @click="handleClick($event, item.testid - 1)">
+									<span class="radio-content" v-show="ansArray[item.testid-1] == 'C'"></span>
+								</span>
+								<span class="radio-value">C</span>
+								<span class="list-content">{{item.ansC}}</span>
+							</li>
+							<li class="optionlist">
+								<span class="radio" data-id='D' @click="handleClick($event, item.testid - 1)">
+									<span class="radio-content" v-show="ansArray[item.testid-1] == 'D'"></span>
+								</span>
+								<span class="radio-value">D</span>
+								<span class="list-content">{{item.ansD}}</span>
+							</li>
+
+							<div class="correctAns" v-show="status === 2 && ansArray[item.testid-1] !== item.anstrue">
+								 <div class="cor-content" >
+									<span>你的答案: {{ansArray[item.testid-1] === -1 ? '' : ansArray[item.testid-1]}}</span>
+									<span>正确答案：{{item.anstrue}}</span>
+									<p><a>解析:</a> <b>{{item.analysis}}</b></p>
 								 </div>
 							</div>
 						</ul>
-					</li>
+					</li> 
 				</ul>
 			</div>
-
-		<div style="padding:40px">
-			<back></back>
-		</div>
 		</div>
 		<div class="cover" v-show="showDialogs"></div>
 		<div class="tip" v-show="showDialogs" ref="dialog">
@@ -52,8 +69,9 @@
 
 <script>
 import DialogBlock from '../components/Dialog'
-import Back from '../components/back'
 import Timer from '../components/timer'
+import qs from 'qs'
+import axios from 'axios'
 export default {
 	data() {
 		return {
@@ -61,70 +79,58 @@ export default {
 			status: 0,
 			testlist:[
 				{
+					analysis: 'ass',
+					ansA: 'ass',
+					ansB: 'ass',
+					ansC: 'ass',
+					ansD: 'ass',
+					anstrue: 'B',
 					type: '选择题',
-					question: 'aaahioewhiofaaahioewhiaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofaaahioewhiofofaaahioewhiofaaahioewhiofaaahioewhiof',
-					options: [
-						{
-							icon: 'A',
-							contents: 'dwhide'
-						},
-						{
-							icon: 'B',
-							contents: 'dwhide'
-						},
-						{
-							icon: 'C',
-							contents: 'dwhide'
-						},
-						{
-							icon: 'D',
-							contents: 'dwhide'
-						}
-					]
-				},
-				{
+					belong: '1',
+					testid: '1',
+					title: 'aswfevdf'
+				},{
+					analysis: 'ass',
+					ansA: 'ass',
+					ansB: 'ass',
+					ansC: 'ass',
+					ansD: 'ass',
+					anstrue: 'A',
 					type: '选择题',
-					question: 'aaahioewhiof',
-					options: [
-						{
-							icon: 'A',
-							contents: 'dwhide'
-						},
-						{
-							icon: 'B',
-							contents: 'dwhide'
-						},
-						{
-							icon: 'C',
-							contents: 'dwhide'
-						},
-						{
-							icon: 'D',
-							contents: 'dwhide'
-						}
-					]
+					belong: '1',
+					testid: '2',
+					title: 'aswfevdf'
+				},{
+					analysis: 'ass',
+					ansA: 'ass',
+					ansB: 'ass',
+					ansC: 'ass',
+					ansD: 'ass',
+					anstrue: 'D',
+					type: '选择题',
+					belong: '1',
+					testid: '3',
+					title: 'aswfevdf'
+				},{
+					analysis: 'ass',
+					ansA: 'ass',
+					ansB: 'ass',
+					ansC: 'ass',
+					ansD: 'ass',
+					anstrue: 'A',
+					type: '选择题',
+					belong: '1',
+					testid: '4',
+					title: 'aswfevdf'
 				}
 			],
-			titlenum: -1,
-			ansnum: -1,
 			ansArray: [],
-			correctArray:[
-				{
-					icon: 'B',
-					reason: 'dhoweiofjpsdjoiqwjfpo'
-				},
-				{
-					icon: 'D',
-					reason: 'dhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpodhoweiofjpsdjoiqwjfpo'
-				}
-			],
 			showDialogs: false,
 			message:''
 		}
 	},
 	components: {
 		DialogBlock,
-		Back,
 		Timer
 	},
 	computed: {
@@ -152,8 +158,28 @@ export default {
 				}
 			}
 		},
-		showanswer (index1,index){
-			// console.log(index1 , index)
+		showDialogItem () {
+			this.showDialogs = true;
+			document.documentElement.style.overflow ='hidden'
+			document.documentElement.style.paddingRight = 17 + 'px'
+			this.$refs.dialog.style.left = (this.screenWidth/2 - 200)+'px'
+			console.log(this.message)
+		},
+		// 获取题目
+		getTestList(){
+			axios.post('http://192.168.5.101:8080/goc/tests/tsDetailed', qs.stringify({
+				'belong': '1'
+			}))
+			.then(res => {
+				console.log(res.data)
+				let _data = res.data
+				this.testlist = _data
+			})
+			.catch(err => {
+				console.log(err)
+			})
+		},
+		handleClick(e,belong) {
 			if(this.status === 0) {
 				this.message = '请点击开始按钮'
 				this.showDialogItem()
@@ -163,33 +189,53 @@ export default {
 				console.log('已结束测试')
 				return
 			}
-			this.titlenum = index1
-			this.ansnum = index
-			this.ansArray[index1] = this.testlist[index1].options[index].icon
+			this.$set(this.ansArray, belong, e.currentTarget.getAttribute('data-id'));
 		},
-		showDialogItem () {
-			this.showDialogs = true;
-			document.documentElement.style.overflow ='hidden'
-			document.documentElement.style.paddingRight = 17 + 'px'
-			this.$refs.dialog.style.left = (this.screenWidth/2 - 200)+'px'
-			console.log(this.message)
-		}
+		// 返回上一页函数
+		goBack () {
+      window.history.go(-1);
+    }
+	},
+	computed: {
+	},
+	watch: {
 	},
 	mounted() {
+		this.getTestList()
 	}
 }
 </script>
 <style>
-	.back {
-		display: inline-block;
-		position: relative;
-		height: 50px;
-		line-height: 50px;
-		padding:0 35px;
-		color: #EA7E5c;
-		font-weight: bold;
-		text-decoration: none;
-	}
+  .image_auto{
+    width: 100%;
+    height: 100%;
+  }
+  .go_back{
+    height: 60px;
+    width: 100px;
+    /* background: lawngreen; */
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .back_icon{
+    height: 25px;
+    width: 25px;
+    /* background: crimson; */
+  }
+  .back_icon img, .study_stutas_icon img{
+    transform:rotate(-90deg);
+    -ms-transform:rotate(-90deg); 	/* IE 9 */
+    -moz-transform:rotate(-90deg); 	/* Firefox */
+    -webkit-transform:rotate(-90deg); /* Safari 和 Chrome */
+    -o-transform:rotate(-90deg); 	/* Opera */
+  }
+  .back_text{
+    height: 30px;
+    line-height: 30px;
+    margin-left: 10px;
+    color: #EA7C5A;
+  }
 	.trangle{
 		content: '';
 		width:0;

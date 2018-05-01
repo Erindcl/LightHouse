@@ -141,7 +141,7 @@
           <span :class="{color_white: tsQ4 == '5-3小时', bgcolor_grey: tsQ4 == '5-3小时', color_grey: tsQ4 != '5-3小时'}" @click="saveparameter(3,4,'5-3小时')">5-3小时</span>
           <span :class="{color_white: tsQ4 == '3小时以下', bgcolor_grey: tsQ4 == '3小时以下', color_grey: tsQ4 != '3小时以下'}" @click="saveparameter(3,4,'3小时以下')">3小时以下</span>
         </div>
-        <div class="submit_all_btn" @click="changeModulStatus()">提交修改</div>
+        <div class="submit_all_btn" @click="changeRoud()">提交修改</div>
       </div>
     </div>
 		<!-- 往前一步（后） -->
@@ -162,6 +162,8 @@
   </div>
 </template>
 <script>
+  import axios from 'axios'
+  import qs from 'qs'
   export default {
 	  data() {
 		  return {
@@ -183,10 +185,27 @@
         firstStep: [],
         secondStep: [],
         thirdStep: [],
+        newInfor: {}
 		  }
 	  },
     created () {
       this.menun(0);
+      this.fsQ1 = this.$parent.fsQ1;
+      this.fsQ2 = this.$parent.fsQ2;
+      this.ssQ1 = this.$parent.ssQ1;
+      this.ssQ2 = this.$parent.ssQ2;
+      this.ssQ3 = this.$parent.ssQ3;
+      this.ssQ4 = this.$parent.ssQ4;
+      this.ssQ5 = this.$parent.ssQ5;
+
+      this.tsQ1 = this.$parent.tsQ1;
+      this.tsQ2 = this.$parent.tsQ2;
+      this.tsQ3 = this.$parent.tsQ3;
+      this.tsQ4 = this.$parent.tsQ4;
+
+      this.firstStep = this.$parent.firstStep;
+      this.secondStep = this.$parent.secondStep;
+      this.thirdStep = this.$parent.thirdStep;
     },
 	  methods: {
 		  // 用户的选择进行存储
@@ -269,7 +288,7 @@
         }
         this.menun(750);
 			},
-			changeModulStatus () {
+			changeRoud () {
         
         this.firstStep.push(this.fsQ1);
         this.firstStep.push(this.fsQ2);
@@ -285,27 +304,54 @@
         this.thirdStep.push(this.tsQ3);
         this.thirdStep.push(this.tsQ4);
 
-        // let sendData = {
-        //   firstStep: this.firstStep,
-        //   secondStep: this.secondStep,
-        //   thirdStep: this.thirdStep,
-        // }
-        // const self = this;
-        // axios.post('', qs.stringify(sendData), {
-        //   headers: {
-        //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-        //   }
-        // }).then(function (data) {
-        //   console.log('路线制定 服务器连接成功');
-        // })
-        // .catch(function (err) {
-        //   console.log('路线制定 服务器连接错误，原因：' + err);
-				// })
-			  this.nowStepNum = 0;
-				this.menun(750);
+        let sendData = {
+          firstStep: this.firstStep.join(';'),
+          secondStep: this.secondStep.join(';'),
+          thirdStep: this.thirdStep.join(';'),
+        }
+        const self = this;
+        axios.post('http://192.168.5.101:8080/goc/route/addRoute', qs.stringify(sendData), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (data) {
+          console.log('路线制定 服务器连接成功');
+        })
+        .catch(function (err) {
+          console.log('路线制定 服务器连接错误，原因：' + err);
+				})
+        this.nowStepNum = 0;
+        let preStepBtn = document.getElementById('pre_step_bt');
+        let nextStepBtn = document.getElementById('next_step_bt');
+        preStepBtn.style.cursor = 'not-allowed';
+        preStepBtn.style.background = '#7784957a';
+        nextStepBtn.style.cursor = 'pointer';
+        nextStepBtn.style.background = '#EA7C5A';
+        this.menun(750);
+        this.putNewInfor();
       },
 			menun (num) {
 				window.scrollTo(0, num);
+      },
+      // 将新的数据传递给父组件
+      putNewInfor () {
+        this.newInfor = {
+          fsQ1: this.fsQ1,
+          fsQ2: this.fsQ2,
+          ssQ1: this.ssQ1,
+          ssQ2: this.ssQ2,
+          ssQ3: this.ssQ3,
+          ssQ4: this.ssQ4,
+          ssQ5: this.ssQ5,
+          tsQ1: this.tsQ1,
+          tsQ2: this.tsQ2,
+          tsQ3: this.tsQ3,
+          tsQ4: this.tsQ4,
+          firstStep: this.firstStep,
+          secondStep: this.secondStep,
+          thirdStep: this.thirdStep
+        };
+        this.$emit('updateRoudInfor', this.newInfor);
       }
 	  },
 	  mounted () {

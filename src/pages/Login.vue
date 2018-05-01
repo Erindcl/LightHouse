@@ -1,5 +1,5 @@
 <template>
- <div>
+ <div class="login_bg">
   <div class="contain_box">
     <div class="main_box">
       <div class="notice_box" style="align-items: flex-start;">

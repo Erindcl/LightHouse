@@ -49,7 +49,9 @@
 		  }
 		},
     created () {
-      
+      console.log('这里是个人中心的当前学习');
+      console.log(this.$parent.lesson);
+      this.lenson = this.$parent.lesson;
     },
 	  methods: {
       initChart () {
