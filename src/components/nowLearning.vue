@@ -29,18 +29,23 @@
 <script src="./static/js/echarts.common.min.js"></script>
 <script>
   export default {
+    props: {
+      lesson: {
+        default: {}
+      }
+    },
 	  data() {
 		  return {
-        lesson: {
-          ltimeLength: 24,
-          lcompleted: 11,
-          title: 'HTML+CSS',
-          chapter: {
-            name: 'CSS基础',
-            ctimeLength: 24,
-            ccompleted: 11,
-          }
-        }
+        // lesson: {
+        //   ltimeLength: 24,
+        //   lcompleted: 11,
+        //   title: 'HTML+CSS',
+        //   chapter: {
+        //     name: 'CSS基础',
+        //     ctimeLength: 24,
+        //     cc`.......................................................................................ompleted: 11,
+        //   }
+        // }
 		  }
     },
     computed: {
@@ -49,16 +54,23 @@
 		  }
 		},
     created () {
-      console.log('这里是个人中心的当前学习');
-      console.log(this.$parent.lesson);
-      this.lenson = this.$parent.lesson;
+      // console.log('这里是个人中心的当前学习');
+      // console.log(this.$parent.lesson);
+      // this.lenson = this.$parent.lesson;
     },
 	  methods: {
       initChart () {
+        console.log('这是图表');
+        console.log(this.lesson);
+        let lesson = this.lesson
+        console.log(lesson);
+        console.log(lesson.lcompleted);
+        console.log(lesson.ltimeLength);
         let data = [
           {value: this.lesson.lcompleted, name: parseInt(this.lesson.lcompleted / this.lesson.ltimeLength * 100) + '%'},
           {value: this.lesson.ltimeLength - this.lesson.lcompleted}
         ];
+        console.log(data);
         let circleChart = echarts.init(document.getElementById('circle_contain'));
         let option = {
           series: [{
@@ -87,6 +99,9 @@
       }
 	  },
 	  mounted () {
+      console.log(this.lesson);
+      console.log(this.lesson.lcompleted);
+      console.log(this.lesson.ltimeLength);
 		  this.initChart(); // 放在created中无用
 	  }
   }

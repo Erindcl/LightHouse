@@ -44,6 +44,17 @@
 </template>
 <script>
   export default {
+    props: {
+      lesson: {
+        default: {}
+      },
+      lessons: {
+        default: []
+      },
+      res: {
+        default: {}
+      }
+    },
 	  data() {
 		  return {
         // lesson: {  // 当前学习模块的数据
@@ -244,16 +255,12 @@
         //     countstunus: [21, 17, 13]
         //   }
         // }
-        lesson: {},
-        lessons: [],
-        res: {}
+        // lesson: {},
+        // lessons: [],
+        // res: {}
 		  }
     },
     created () {
-      this.lesson = this.$parent.lesson;
-      this.lessons = this.$parent.lessons;
-      this.res = this.$parent.res;
-      console.log(111584598);
     },
 	  methods: {
       // 培养计划axios  此函数中的信息用到了当前学习模块中的信息
@@ -348,7 +355,6 @@
 		  for (let i = 0; i < this.lessons.length; i++) {
         document.getElementsByClassName('now_progress_percent')[i].style.width = this.lessons[i].completedPercent;
       }
-      console.log(111974894598);
 	  }
   }
 </script>

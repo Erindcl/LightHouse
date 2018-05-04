@@ -2,7 +2,7 @@
   <div class="personal">
   	<div class="personal_top">
   		<div class="user-bg">
-  			<input type="button" value="上传封面图片" @click="showImgDialogItem">
+  			<input type="button" value="上传封面图片" @click="changeModelStatus(true,false)">
   			<img :src="images.url"> 
   		</div>
   		<div class="user-info">
@@ -14,7 +14,7 @@
   				<p><span class="userinfo">{{userinfo.introduce}}</span></p>
   			</div>
   			<div class="editbtn">
-  				<input type="button" @click="showDialogItem" value="编辑个人资料">
+  				<input type="button" @click="changeModelStatus(true,true)" value="编辑个人资料">
   			</div>
   		</div>
   	</div>
@@ -67,26 +67,46 @@
   		</ul>
   		<div class="tab-content" >
   			<div v-show="currentIndex === 0">
-          <now-learning></now-learning>
+          <now-learning :lesson='lesson'></now-learning>
         </div>
   			<div v-show="currentIndex === 1">
   				<study-record></study-record>
   			</div>
   			<div v-show="currentIndex === 2">
-         <do-roud @updateRoudInfor="updateRoud"></do-roud>
+         <do-roud :fsQO='fsQO' :fsQT='fsQT' :ssQO='ssQO' :ssQT='ssQT' :ssQR='ssQR' :ssQF='ssQF' :ssQV='ssQV' :tsQO='tsQO' :tsQT='tsQT' :tsQR='tsQR' :tsQF='tsQF' :firstStep='firstStep' :secondStep='secondStep' :thirdStep='thirdStep' @updateRoudInfor="updateRoud"></do-roud>
         </div>
   			<div v-show="currentIndex === 3">
-          <study-plan></study-plan>   
+          <study-plan :lesson='lesson' :lessons='lessons' :res='res'></study-plan>   
         </div>
   			<div v-show="currentIndex === 4">
   				<system-message></system-message>
   			</div>
   		</div>
   	</div>
-  	<div class="dialog" ref="dialog1" v-show="showDialog">
-      <div class="dia-content">
-        <div class="dia-head">
+  	<div class="cover" v-if="showDialog||showImgDialog">
+  	</div>
+
+		<!-- 项目上传模态框 -->
+  <div class="upload_model" v-show="showModel" :style="{ width: this.windowClient.width + 'px', height: this.windowClient.height + 'px' }">
+    <div class="center_box">
+			<div class="img-dia-content" v-show="!modelShowUserInfor">
+        <div class="img-dia-head">
+          <input type="file" class="upload" @change="uploadCover" accept="application/mim">
+          <span>选择上传的图片</span>
+        </div>
+        <div class="img-show">
           <img :src="images.url">
+        </div>
+      </div>
+			<div class="dia-content" v-show="modelShowUserInfor">
+        <div class="dia-head">
+          <img class="user_hp" :src="images.url">
+					<div class="upload_hp_box">
+						<div class="upload_hp_img">
+              <img src="../../static/icons/camera.png" class="image_auto" alt="">
+            </div>
+            <span>修改头像</span>
+					</div>
           <!-- <span><input type="file"></span> -->
         </div>
         <div class="dia-info">
@@ -102,42 +122,24 @@
           <p><label>简介</label> <textarea type="select" v-model="userinfocopy.introduce"></textarea></p>
         </div>
       </div>
-      <div class="dia-footer">
-        <span @click="changeUserInfo">确定</span>
-        <span @click="hideDialog">取消</span>
-      </div>
-  	</div>
-
-
-    <div class="img-dialog" ref="dialog2" v-show="showImgDialog">
-      <div class="img-dia-content">
-        <div class="img-dia-head">
-          <input type="file" class="upload" @change="uploadCover" accept="application/mim">
-          <span>选择上传的图片</span>
-        </div>
-        <div class="img-show">
-          <img :src="images.url">
-        </div>
-      </div>
-      <div class="img-dia-footer">
-        <span @click="hideImgDialog">取消</span>
-        <span @click="handleUpload">上传</span>
+      <div class="level_box" style="justify-content: center;height: 68px;">
+        <div class="close_btn" @click="changeModelStatus(false,true)">取 消</div>
+        <div class="submit_btn" style="margin-left: 50px;" @click="changeUserInfo">上 传</div>
       </div>
     </div>
-  	<div class="cover" v-if="showDialog||showImgDialog">
-  	</div>
+  </div>
   </div>
 </template>
 <script>
-import Calendar from '../components/calendar'
-import studyRecord from '../components/studyRecord'
-import systemMessage from '../components/systemMessage'
-import nowLearning from '../components/nowLearning'
-import studyPlan from '../components/studyPlan'
-import doRoud from '../components/doRoud'
-import axios from 'axios'
-import qs from 'qs'
-export default {
+  import Calendar from '../components/calendar'
+  import studyRecord from '../components/studyRecord'
+  import systemMessage from '../components/systemMessage'
+  import nowLearning from '../components/nowLearning'
+  import studyPlan from '../components/studyPlan'
+  import doRoud from '../components/doRoud'
+  import axios from 'axios'
+  import qs from 'qs'
+  export default {
     data () {
       return {
       	currentIndex: 0,
@@ -179,7 +181,7 @@ export default {
 			// 当前学习模块的数据  培养计划也有使用到这块数据
 				lesson: {
           ltimeLength: 111,
-          lcompleted: 11,
+          lcompleted: 0,
           title: 'HTML+CSS',
           chapter: {
             name: 'CSS基础',
@@ -378,22 +380,26 @@ export default {
 				},
 			// 路线制定模块数据
         // 第一步当前选择
-        fsQ1: '前端',
-        fsQ2: 'web前端',
+        fsQO: '前端',
+        fsQT: 'web前端',
         // 第二步当前选择
-        ssQ1: '轻松',
-        ssQ2: '没有了解过编程',
-        ssQ3: '40%以下',
-        ssQ4: '较差',
-        ssQ5: '较差',
+        ssQO: '轻松',
+        ssQT: '没有了解过编程',
+        ssQR: '40%以下',
+        ssQF: '较差',
+        ssQV: '较差',
         // 第三步当前选择
-        tsQ1: '就业需要',
-        tsQ2: '主流技术',
-        tsQ3: '看视频',
-				tsQ4: '7小时以上',
+        tsQO: '就业需要',
+        tsQT: '主流技术',
+        tsQR: '看视频',
+				tsQF: '7小时以上',
         firstStep: [],
         secondStep: [],
-        thirdStep: []
+        thirdStep: [],
+			// 弹框数据
+			  windowClient: {},
+				showModel: false,   // 弹框是否显示
+				modelShowUserInfor: true
       }
     },
     components: {
@@ -424,6 +430,7 @@ export default {
 			this.studyPlanGetData();
 		},
     methods: {
+			// 个人中心切换模块
       toggleTab (index) {
 				// document.documentElement.style.overflow='hidden';
 				switch (index) {
@@ -439,7 +446,7 @@ export default {
 						break;
 					case 3:
 					  console.log('培养计划模块');
-						this.studyPlanGetData();
+						// this.studyPlanGetData();
 						break;
 					default:
 						console.log('系统小结模块');
@@ -459,30 +466,6 @@ export default {
           this.currentSummary = null
           console.log('null')
         }
-      },
-      //显示对话框
-      showDialogItem () {
-      	this.showDialog = true;
-      	document.documentElement.style.overflow ='hidden'
-      	document.documentElement.style.paddingRight = 17 + 'px'
-      	this.$refs.dialog1.style.left = (this.screenWidth/2 - 300)+'px'
-      },
-      //隐藏对话框
-      hideDialog () {
-      	this.showDialog = false;
-      	document.documentElement.style.paddingRight = 0
-      	document.documentElement.style.overflow ='scroll'
-      },
-      showImgDialogItem() {
-        this.showImgDialog = true;
-        document.documentElement.style.overflow ='hidden'
-        document.documentElement.style.paddingRight = 17 + 'px'
-        this.$refs.dialog2.style.left = (this.screenWidth/2 - 200)+'px'
-      },
-      hideImgDialog () {
-        this.showImgDialog = false;
-        document.documentElement.style.paddingRight = 0
-        document.documentElement.style.overflow ='scroll'
       },
       //编辑总结
       editsum() {
@@ -509,6 +492,7 @@ export default {
           }
         }).then(function (res) {
 					console.log('个人中心信息 服务器连接成功');
+					console.log(res.data);
 					let _data = res.data.user
           self.userinfo.username = _data.username
           self.userinfo.direction =  _data.direction
@@ -521,6 +505,7 @@ export default {
           self.lesson.title = res.data.studying.tcoursename; 
           self.lesson.chapter.ctimeLength = res.data.studying.studydate; 
           self.lesson.chapter.ccompleted = res.data.ccompleted;
+					console.log(self.lesson);
         })
         .catch(function (err) {
           console.log('个人中心信息 服务器连接错误，原因：' + err);
@@ -528,7 +513,7 @@ export default {
       },
       // 修改个人信息
       changeUserInfo() {
-        this.hideDialog()
+        this.changeModelStatus(false,true);
         let person = {
           'name': this.userinfocopy.username,
           'head': '123.png',
@@ -606,107 +591,11 @@ export default {
 			// 培养计划axios  此函数中的信息用到了当前学习模块中的信息
       studyPlanGetData () {
         const self = this;
-        // axios.post('http://192.168.5.101:8080/goc/course/showTc', {}, {
-        //   headers: {
-        //     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-        //   }
-        // }).then(function (res) {
-				let res = {
-					data: {
-							"course": [{
-			"tcourseid": 1,
-			"tcoursename": "HTML+CSS"
-		},
-		[{
-			"courseid": 1,
-			"level": 1,
-			"tcourseid": 1,
-			"coursename": "HTML基础",
-			"label": "基础",
-			"klabel": "HTML基础用法",
-			"astudydate": 7,
-			"bstudydate": 5,
-			"state": 0
-		}, {
-			"courseid": 2,
-			"level": 1,
-			"tcourseid": 1,
-			"coursename": "CSS基础",
-			"label": "基础",
-			"klabel": "CSS基础用法",
-			"astudydate": 7,
-			"bstudydate": 5,
-			"state": 0
-		}, {
-			"courseid": 3,
-			"level": 1,
-			"tcourseid": 1,
-			"coursename": "拓展1",
-			"label": "企业",
-			"klabel": "xxx",
-			"astudydate": 4,
-			"bstudydate": 3,
-			"state": 0
-		}, {
-			"courseid": 4,
-			"level": 1,
-			"tcourseid": 1,
-			"coursename": "拓展2",
-			"label": "企业",
-			"klabel": "xxx",
-			"astudydate": 5,
-			"bstudydate": 4,
-			"state": 0
-		}], {
-			"tcourseid": 2,
-			"tcoursename": "JS"
-		},
-		[{
-			"courseid": 6,
-			"level": 1,
-			"tcourseid": 2,
-			"coursename": "JS基础",
-			"label": "基础",
-			"klabel": "JS基础用法",
-			"astudydate": 7,
-			"bstudydate": 5,
-			"state": 0
-		}]
-	],
-	"studycourses": [{
-		"userid": 111,
-		"courseid": 1,
-		"tcourseid": 1,
-		"datenum": 1,
-		"startdate": "五月 1, 2018",
-		"enddate": "五月 1, 2018"
-	}, {
-		"userid": 111,
-		"courseid": 2,
-		"tcourseid": 1,
-		"datenum": 6,
-		"startdate": "四月 16, 2018",
-		"enddate": "四月 23, 2018"
-	}, {
-		"userid": 111,
-		"courseid": 3,
-		"tcourseid": 2,
-		"datenum": 5,
-		"startdate": "四月 4, 2018",
-		"enddate": "四月 8, 2018"
-	}, {
-		"userid": 111,
-		"courseid": 4,
-		"tcourseid": 1,
-		"datenum": 5,
-		"startdate": "四月 21, 2018",
-		"enddate": "四月 26, 2018"
-	}],
-	"countstunus": [29, 7]
-					}
-				};
-
-
+        axios.post('http://192.168.5.101:8080/goc/course/showTc', {}, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+          }
+        }).then(function (res) {
           console.log('培养计划 服务器连接成功');
           self.dealData(res.data.course);  // lessons.lessonName lessons.chapters.cName  lessons.chapters.tipType  lessons.chapters.ctimeLength  
           console.log('调用完第一个函数');
@@ -725,10 +614,10 @@ export default {
 					console.log('后台加载来的培养计划');
 					console.log(self.lessons);
 					console.log(self.res);
-        // })
-        // .catch(function (err) {
-        //   console.log('培养计划 服务器连接错误，原因：' + err);
-        // })
+        })
+        .catch(function (err) {
+          console.log('培养计划 服务器连接错误，原因：' + err);
+        })
       },
       // 章节状态设置以及已学天数设置  以及学习的课程的学习时长设置lessons.lcompleted
       setChapterInfor (learnedChap) {
@@ -803,42 +692,65 @@ export default {
 					self.firstStep = res.data.direct.split(';');
 					self.secondStep = res.data.questiontwo.split(';');
 					self.thirdStep = res.data.questionthree.split(';');
-					self.fsQ1 = self.firstStep[0];
-        	self.fsQ2 = self.firstStep[1];
-        	self.ssQ1 = self.secondStep[0];
-        	self.ssQ2 = self.secondStep[1];
-        	self.ssQ3 = self.secondStep[2];
-        	self.ssQ4 = self.secondStep[3];
-        	self.ssQ5 = self.secondStep[4];
-        	self.tsQ1 = self.thirdStep[0];
-        	self.tsQ2 = self.thirdStep[1];
-        	self.tsQ3 = self.thirdStep[2];
-        	self.tsQ4 = self.thirdStep[3];
+					self.fsQO = self.firstStep[0];
+        	self.fsQT = self.firstStep[1];
+        	self.ssQO = self.secondStep[0];
+        	self.ssQT = self.secondStep[1];
+        	self.ssQR = self.secondStep[2];
+        	self.ssQF = self.secondStep[3];
+        	self.ssQV = self.secondStep[4];
+        	self.tsQO = self.thirdStep[0];
+        	self.tsQT = self.thirdStep[1];
+        	self.tsQR = self.thirdStep[2];
+        	self.tsQF = self.thirdStep[3];
         })
         .catch(function (err) {
           console.log('路线参数获取 服务器连接错误，原因：' + err);
 				})
 			},
 			updateRoud (val) {
-        this.fsQ1 = val.fsQ1;
-      	this.fsQ2 = val.fsQ2;
-      	this.ssQ1 = val.ssQ1;
-      	this.ssQ2 = val.ssQ2;
-      	this.ssQ3 = val.ssQ3;
-      	this.ssQ4 = val.ssQ4;
-      	this.ssQ5 = val.ssQ5;
+        this.fsQO = val.fsQO;
+      	this.fsQT = val.fsQT;
+      	this.ssQO = val.ssQO;
+      	this.ssQT = val.ssQT;
+      	this.ssQR = val.ssQR;
+      	this.ssQF = val.ssQF;
+      	this.ssQV = val.ssQV;
 
-      	this.tsQ1 = val.tsQ1;
-      	this.tsQ2 = val.tsQ2;
-      	this.tsQ3 = val.tsQ3;
-      	this.tsQ4 = val.tsQ4;
+      	this.tsQO = val.tsQO;
+      	this.tsQT = val.tsQT;
+      	this.tsQR = val.tsQR;
+      	this.tsQF = val.tsQF;
 
       	this.firstStep = val.firstStep;
       	this.secondStep = val.secondStep;
       	this.thirdStep = val.thirdStep;
-			}
+			},
+			client () {
+        if (window.innerHeight !== undefined) {
+          return {
+            "width": window.innerWidth,
+            "height": window.innerHeight
+          }
+        } else if (document.compatMode === "CSS1Compat") {
+          return {
+            "width": document.documentElement.clientWidth,
+            "height": document.documentElement.clientHeight
+          }
+        } else {
+          return {
+            "width": document.body.clientWidth,
+            "height": document.body.clientHeight
+          }
+        }
+      },
+			changeModelStatus (model,content) {
+        this.showModel = model;  // 表示是否展示模态框
+        this.modelShowUserInfor = content;  // 表示展示内容为背景图片还是个人信息
+      }
     },
     mounted () {
+			this.windowClient = this.client();
     	var that = this
     	window.onresize = () => {
     		return (() => {
@@ -858,6 +770,10 @@ export default {
   }
 </script>
 <style scoped>
+  .image_auto{
+    width: 100%;
+    height: 100%;
+  }
 	.personal{
 		width:1000px;
 		min-height:800px;
@@ -1087,11 +1003,33 @@ export default {
     height: 100px;
     display: inline-block;
     vertical-align: top;
+		position: relative;
   }
-  .dia-head img{
+  .user_hp{
     width: 100px;
     height: 100px;
     margin: 20px 40px;
+  }
+	.upload_hp_box{
+		width: 100px;
+		height: 100px;
+		position: absolute;
+		background: rgba(0,0,0,0.7);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		z-index: 10;
+		top: 20px;
+		left: 40px;
+    color: #fff;
+    font-size: 10px;
+		justify-content: center;
+    cursor: pointer;
+	}
+  .upload_hp_img{
+    width: 30px;
+    height: 30px;
+    margin-bottom: 10px;
   }
   .dia-info{
     display: inline-block;
@@ -1145,32 +1083,35 @@ export default {
   }
   .img-show {
     width: 100%;
-    height: 150px;
+    height: 200px;
     padding: 0 30px;
     box-sizing:border-box;
     border-radius: 4px;
     overflow: hidden;
+    margin-bottom: 30px;
   }
   .img-show img{
     width: 100%;
   }
   .img-dia-head {
     height: 50px;
-    padding: 15px 30px;
+    padding: 0px 30px;
+    margin-bottom: 30px;
   }
   .upload{
     position: absolute;
     opacity: 0;
     width: 160px;
-    height: 40px;
+    height: 30px;
     vertical-align: top;
   }
   .img-dia-head span{
     display: inline-block;
-    padding:10px 25px;
+    padding:6px 15px;
     background-color: #EA7C5A;
     color: white;
-    border-radius: 6px;
+    font-size: 14px;
+    border-radius: 3px;
     z-index: 100;
   }
   .img-dia-footer {
@@ -1185,6 +1126,46 @@ export default {
     color: white;
     border-radius: 4px;
     margin-right: 20px;
+  }
+	/* 模态框样式 */
+  .upload_model{
+    background: rgba(0,0,0,0.7);
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .center_box{
+    height: 400px;
+    width: 650px;
+    background: #fff;
+    overflow-y: auto;
+		padding-top: 50px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    /* padding: 15px 0px; */
+  }
+  .level_box{
+    width: 90%;
+    /* height: 100px; */
+    /* background: #6ABA9C; */
+    margin: 20px auto 0px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .close_btn, .submit_btn{
+    height: 30px;
+    font-size: 14px;
+    line-height: 30px;
+    padding: 0px 15px;
+    background: #EA7C5A;
+    color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
   }
 </style>
 

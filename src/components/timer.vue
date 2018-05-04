@@ -1,11 +1,11 @@
 <template>
 	<div class="timer-wrapper"  @click="handleClick">
-		<div class="start" v-if="status === 0" >
+		<div class="start" v-if="statuses === 0" >
 			<img src="../../static/icons/start.png">
 			<span style="width:80px;text-align:center;">开始学习</span>
 		</div>
-		<div class="ing" v-if="status === 1" >
-			<img src="../../static/icons/stop.png">
+		<div class="ing" v-if="statuses === 1" >
+			<img src="../../static/icons/stopIcon.png">
 			<span style="width:80px;text-align:right">正在学习中</span>
 			<span class="spinner">
 			  <div class="rect1"></div>
@@ -13,9 +13,9 @@
 			  <div class="rect3"></div>
 			</span>
 		</div>
-		<div class="over" v-if="status === 2" >
+		<div class="over" v-if="statuses === 2" >
 			<img src="../../static/icons/over.png">
-			<span style="width:130px;text-align:center">已结束学习 用时两天</span>
+			<span style="width:200px;text-align:right">已结束学习 用时 {{formatDuring}}</span>
 		</div>
 	</div>
 </template>
@@ -24,6 +24,10 @@
 export default {
 	data() {
 	  return {
+	  	statuses: this.status,
+	  	startTime: '',
+	  	endTime: '',
+	  	time: ''
 	  }
 	},
 	props: {
@@ -32,21 +36,41 @@ export default {
 	  	default: 0
 	  }
 	},
+	computed: {
+		formatDuring () {
+			// let days = parseInt(mss / (1000 * 60 * 60 * 24));
+    	let hours = parseInt((this.time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    	let minutes = parseInt((this.time % (1000 * 60 * 60)) / (1000 * 60));
+			let seconds = (this.time % (1000 * 60)) / 1000;
+			if (hours < 10) {
+				hours = '0' + hours;
+			}
+			if (minutes < 10) {
+				minutes = '0' + minutes;
+			}
+			if (seconds < 10) {
+				seconds = '0' + seconds;
+			}
+    	return hours + " : " + minutes + " : " + seconds;
+		}
+	},
 	methods:{
 		handleClick() {
-			if(this.status === 0) {
-				console.log('a', this.status)
-				this.status = 1
-				let statuses = this.status
-				this.$emit('toggleStatus', statuses)
+			if(this.statuses === 0) {
+				this.statuses = 1
+				let status = this.statuses
+				this.startTime = Date.parse(new Date())
+				console.log(this.startTime)
+				this.$emit('toggleStatus', status)
 				return
 			}
-			if(this.status === 1) {
-				console.log('b', this.status)
-				this.status = 2
-				console.log('c', this.status)
-				let status1 = this.status
-				this.$emit('toggleStatus', status1)
+			if(this.statuses === 1) {
+				this.statuses = 2
+				// console.log('c', this.status)
+				let status = this.statuses
+				this.endTime = Date.parse(new Date())
+				this.time = this.endTime - this.startTime
+				this.$emit('toggleStatus', status, this.time)
 				return
 			}
 		}

@@ -43,7 +43,7 @@ const liHeight = 35
 export default {
 	data() {
 		return {
-			recordlist:[
+			recordlist:[   //  学习记录数据
 				{
 					date: '2018-02-14',
 					record: [

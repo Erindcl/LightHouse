@@ -48,7 +48,7 @@
 							<div class="correctAns" v-show="status === 2 && ansArray[item.testid-1] !== item.anstrue">
 								 <div class="cor-content" >
 									<span>你的答案: {{ansArray[item.testid-1] === -1 ? '' : ansArray[item.testid-1]}}</span>
-									<span>正确答案：{{item.anstrue}}</span>
+									<span>正确答案：{{item.ansture}}</span>
 									<p><a>解析:</a> <b>{{item.analysis}}</b></p>
 								 </div>
 							</div>
@@ -84,7 +84,7 @@ export default {
 					ansB: 'ass',
 					ansC: 'ass',
 					ansD: 'ass',
-					anstrue: 'B',
+					ansture: 'B',
 					type: '选择题',
 					belong: '1',
 					testid: '1',
@@ -95,7 +95,7 @@ export default {
 					ansB: 'ass',
 					ansC: 'ass',
 					ansD: 'ass',
-					anstrue: 'A',
+					ansture: 'A',
 					type: '选择题',
 					belong: '1',
 					testid: '2',
@@ -106,7 +106,7 @@ export default {
 					ansB: 'ass',
 					ansC: 'ass',
 					ansD: 'ass',
-					anstrue: 'D',
+					ansture: 'D',
 					type: '选择题',
 					belong: '1',
 					testid: '3',
@@ -117,7 +117,7 @@ export default {
 					ansB: 'ass',
 					ansC: 'ass',
 					ansD: 'ass',
-					anstrue: 'A',
+					ansture: 'A',
 					type: '选择题',
 					belong: '1',
 					testid: '4',
@@ -126,7 +126,8 @@ export default {
 			],
 			ansArray: [],
 			showDialogs: false,
-			message:''
+			message:'',
+			id: this.$route.query.id
 		}
 	},
 	components: {
@@ -143,19 +144,32 @@ export default {
 			document.documentElement.style.overflow ='scroll'
 			document.documentElement.style.paddingRight = 0 + 'px'
 		},
-		toggleStatus (status) {
-			this.status = status
+		toggleStatus (statuses,time) {
+			this.status = statuses
 			if(this.status === 2){
 				let len = this.testlist.length
+				let ans = ''
 				for(let i = 0;i < len;i++) {
 					if(this.ansArray[i] == null) {
+						this.status = 1
+						ans += ';'
 						this.ansArray[i] = -1
 						this.message = '还有试题没写完'
-						this.status = 1
 						this.showDialogItem()
 						return
+					}else{
+						ans += (this.ansArray[i] +';')
 					}
 				}
+				console.log(ans)
+				//把答案给后台
+				axios.post('http://192.168.5.101:8080/goc/tests/submitAns', qs.stringify({
+					'userans': ans,
+					'time': time
+				}))
+				.then(res => {
+					console.log(res)
+				})
 			}
 		},
 		showDialogItem () {
@@ -195,8 +209,6 @@ export default {
 		goBack () {
       window.history.go(-1);
     }
-	},
-	computed: {
 	},
 	watch: {
 	},
